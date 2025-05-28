@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-//import "../assets/style1.css"; // adatta il percorso in base a dove metti il file CSS
+import "../assets/style1.css"; // adatta il percorso in base a dove metti il file CSS
 
 function WelcomePage() {
     return (
