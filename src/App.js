@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import WelcomePage from "./pages/WelcomePage"; // assicurati che il path sia corretto
-import Login from "./pages/Login";
+import WelcomePage from "./pages/WelcomePage";
+import Login from "./pages/Login"; // assicurati che il path sia corretto
 
 function App() {
     return (
