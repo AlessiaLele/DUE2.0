@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import './css/style.css'; // Assicurati che il percorso sia corretto
+import '../assets/style4.css'; // Assicurati che il percorso sia corretto
 
 function Singleplayer() {
     useEffect(() => {
@@ -36,7 +36,7 @@ function Singleplayer() {
     };
 
     const confermaUscita = () => {
-        window.location.href = 'menu.html';
+        window.location.href = 'MenuPage.jsx';
     };
 
     return (

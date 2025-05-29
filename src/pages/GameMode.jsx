@@ -6,7 +6,7 @@ const GameMode = () => {
     const navigate = useNavigate();
 
     const playAgainstBot = () => {
-        navigate("/singleplayer");
+        navigate("/Singleplayer.jsx");
     };
 
     const playMultiplayer = () => {
