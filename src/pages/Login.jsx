@@ -13,13 +13,13 @@ function Login() {
         e.preventDefault();
         // qui potresti validare il login con fetch / axios
         // per ora simula un successo:
-        navigate('/MenuPage.jsx');
+        navigate('/menu-page');
     };
 
     const handleRegister = (e) => {
         e.preventDefault();
         // anche qui potresti inviare i dati al server
-        navigate('/MenuPage.jsx');
+        navigate('/menu-page');
     };
 
     return (

@@ -6,11 +6,11 @@ const MenuPage = () => {
     const navigate = useNavigate();
 
     const startGame = () => {
-        navigate("/GameMode.jsx");
+        navigate("/game-mode");
     };
 
     const goToSettings = () => {
-        navigate("/Settings.jsx");
+        navigate("/settings");
     };
 
     const showInstructions = () => {

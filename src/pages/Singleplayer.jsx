@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
-import '../assets/style4.css'; // Assicurati che il percorso sia corretto
+import { useNavigate } from 'react-router-dom';
+import '../assets/style4.css'; // Modifica il percorso se necessario
 
 function Singleplayer() {
+    const navigate = useNavigate();
+
     useEffect(() => {
         const updateButtonState = () => {
             const hand = document.querySelectorAll('#player-hand .card');
@@ -36,7 +39,7 @@ function Singleplayer() {
     };
 
     const confermaUscita = () => {
-        window.location.href = 'MenuPage.jsx';
+        navigate('/menu-page'); // <-- Percorso SPA corretto
     };
 
     return (
@@ -62,24 +65,24 @@ function Singleplayer() {
                 <div className="bot-hand" id="bot-hand">
                     <div className="card-back"></div>
                     <div className="card-back"></div>
-                    <img src="assets/cards/cartaCoperta.png" alt="card-back" />
+                    <img src="/assets/cards/cartaCoperta.png" alt="card-back" />
                 </div>
 
                 <div className="table-area">
                     <button className="table" id="table">
                         <div id="table-card" className="card">
-                            <img src="assets/cards/cartaCoperta.png" alt="cartaCoperta" />
+                            <img src="/assets/cards/cartaCoperta.png" alt="cartaCoperta" />
                         </div>
                     </button>
 
                     <div className="center-pile" id="discard-pile">
-                        <img src="assets/cards/0rosso.png" alt="ROSSO 0" />
+                        <img src="/assets/cards/0rosso.png" alt="ROSSO 0" />
                     </div>
                 </div>
 
                 <div className="player-hand" id="player-hand">
                     <h2>Le tue carte</h2>
-                    <img src="assets/cards/0rosso.png" alt="0rosso" />
+                    <img src="/assets/cards/0rosso.png" alt="0rosso" />
                 </div>
             </div>
         </div>
