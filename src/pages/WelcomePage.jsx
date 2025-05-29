@@ -10,7 +10,7 @@ function WelcomePage() {
         <>
             <header> Benvenuto su Due!! </header>
             <div className="center">
-                <h2><a href="Login.html" className="button">Play</a></h2>
+                <h2><Link to="/Login.jsx" className="button">Play</Link></h2>
             </div>
         </>
     );

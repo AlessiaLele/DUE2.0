@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../assets/style2.css';
 
 function Login() {
     const [isLogin, setIsLogin] = useState(true);
+    const navigate = useNavigate();
 
     const toggleForms = () => {
         setIsLogin(!isLogin);
+    };
+    const handleLogin = (e) => {
+        e.preventDefault();
+        // qui potresti validare il login con fetch / axios
+        // per ora simula un successo:
+        navigate('/MenuPage.jsx');
+    };
+
+    const handleRegister = (e) => {
+        e.preventDefault();
+        // anche qui potresti inviare i dati al server
+        navigate('/MenuPage.jsx');
     };
 
     return (
@@ -15,8 +29,7 @@ function Login() {
             <form
                 id="loginForm"
                 className={isLogin ? 'active' : ''}
-                action="login.php"
-                method="POST"
+                onSubmit={handleLogin}
             >
                 <input type="email" name="email" placeholder="Email" required />
                 <input type="password" name="password" placeholder="Password" required />
@@ -26,8 +39,7 @@ function Login() {
             <form
                 id="registerForm"
                 className={!isLogin ? 'active' : ''}
-                action="register.php"
-                method="POST"
+                onSubmit={handleRegister}
             >
                 <input type="text" name="username" placeholder="Username" required />
                 <input type="email" name="email" placeholder="Email" required />
