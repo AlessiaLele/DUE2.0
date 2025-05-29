@@ -10,11 +10,11 @@ const MenuPage = () => {
     };
 
     const goToSettings = () => {
-        navigate("/settings");
+        navigate("/Settings.jsx");
     };
 
     const showInstructions = () => {
-        navigate("/instructions");
+        navigate("/showInstructions");
     };
 
     const exitGame = () => {
