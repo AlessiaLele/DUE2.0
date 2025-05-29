@@ -6,7 +6,7 @@ const MenuPage = () => {
     const navigate = useNavigate();
 
     const startGame = () => {
-        navigate("/game-mode");
+        navigate("/GameMode.jsx");
     };
 
     const goToSettings = () => {
