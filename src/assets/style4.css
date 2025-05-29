@@ -1,0 +1,221 @@
+body {
+    background: linear-gradient(to bottom, #e0f7fa, #80deea);
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+
+/* Titolo principale */
+h1 {
+    color: #333;
+    margin-top: 20px;
+}
+
+
+/*Contenitore principale del gioco */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/*Creo delle sezioni per una questione ottica*/
+.bot-hand, .table, .player-hand {
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.15); /* leggera trasparenza */
+    border: 2px solid rgba(255, 255, 255, 0.3);  /* bordo più soft */
+    border-radius: 10px;
+    backdrop-filter: blur(4px); /* effetto vetro satinato */
+}
+
+
+/*Titoli delle sezioni*/
+.bot-hand h2, .table h2, .player-hand h2 {
+    margin-top: 0;
+}
+
+/*Carte */
+.card {
+    display: inline-block;
+    padding: 15px 20px;
+    margin: 5px;
+    border-radius: 8px;
+    background-color: #e0e0e0;
+    border: 2px solid #999;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.3s;
+}
+
+/* Comando che consente un leggero ingrandimento della carta quando si passa il cursore*/
+/*.card:hover {
+    transform: scale(1.1);
+}*/
+
+.bot-hand{
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+/*Carte del BOT*/
+.card-black {
+    display: inline-block;
+    padding: 15px 20px;
+    margin: 5px;
+    background-color: #333;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+/*Carte sul tavolo */
+.card-table {
+    background-color: red;
+    color: white;
+    border: 3px solid black;
+    font-size: 1.2em;
+}
+
+/*Bottone exit*/
+#exit-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(45deg, #ff0066, #ffcc00);
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #ff0066, 0 0 20px #ffcc00;
+    cursor: pointer;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 16px;
+    transition: transform 0.2s ease;
+    z-index: 1000;
+}
+
+#exit-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #ff0066, 0 0 30px #ffcc00;
+}
+
+/*Popup bottone exit*/
+.hidden {
+    display: none;
+}
+
+#confirm-popup {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+
+}
+
+#overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+.popup-content {
+    background: #cc0000;
+    border: 5px solid #ffff00;
+    padding: 30px 40px;
+    border-radius: 20px;
+    text-align: center;
+    color: #fff;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    box-shadow: 0 0 20px #ffff00;
+}
+.popup-buttons button {
+    background: #ffff00;
+    border: none;
+    color: #cc0000;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 10px 25px;
+    margin: 0 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #000;
+    transition: transform 0.15s ease;
+}
+
+.popup-buttons button:hover {
+    transform: scale(1.1);
+}
+
+/*Pescare dal mazzo*/
+#draw-pile {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/*Affianchiamo il mazzo da cui pescare e gli scarti*/
+.table-area {
+    display: flex;
+    justify-content: center;
+    gap: 40px; /*Gap tra i due mazzi*/
+    margin-top: 20px;
+}
+
+.player-hand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+.table, .center-pile {
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+}
+
+/*Comando per disabilitare visivamente il cursore quando non è il turno del giocatore*/
+#table-card.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/*il mazzo deve adattarsi bene nel bottone di pesca*/
+.card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.player-hand img, .bot-hand img {
+    max-width: 80px;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.player-hand img:hover {
+    transform: scale(1.1);
+}
+
+#draw-pile, #action-button {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#action-button {
+    margin-right: 10px; /* Spazio tra pulsante e mazzo */
+}
+
