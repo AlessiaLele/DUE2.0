@@ -14,7 +14,7 @@ const MenuPage = () => {
     };
 
     const showInstructions = () => {
-        navigate("/showInstructions");
+        navigate("/Instructions");
     };
 
     const exitGame = () => {

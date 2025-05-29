@@ -1,12 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import WelcomePage from "./pages/WelcomePage";
-import Login from "./pages/Login"; // assicurati che il path sia corretto
+import Login from "./pages/Login";
 import MenuPage from "./pages/MenuPage";
 import GameMode from "./pages/GameMode";
 import Singleplayer from "./pages/Singleplayer";
 import Settings from "./pages/Settings"
-
+import Instructions from "./pages/Instructions";
 
 function App() {
     return (
@@ -18,6 +18,7 @@ function App() {
                 <Route path="/game-mode" element={<GameMode />} />
                 <Route path="/singleplayer" element={<Singleplayer />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/instructions" element={<Instructions />} />
             </Routes>
         </Router>
     );
