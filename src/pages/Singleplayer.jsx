@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../assets/style4.css'; // Modifica il percorso se necessario
+import '../assets/style4.css';
 
 function Singleplayer() {
     const navigate = useNavigate();
