@@ -6,11 +6,11 @@ function Instructions() {
     const navigate = useNavigate();
 
     const goBack = () => {
-        navigate("/menu-page"); // Aggiorna il path in base alla tua route reale
+        navigate("/menu-page");
     };
 
     return (
-        <div className="container">
+        <div className="instructions-container">
             <h1>Regole del Gioco - DUE</h1>
 
             <h2>🎯 Obiettivo del Gioco</h2>

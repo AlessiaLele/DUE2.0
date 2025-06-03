@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "../assets/style5.css";
+import "../assets/style5.css"; // Adatta il percorso se necessario
 
 const GameMode = () => {
     const navigate = useNavigate();

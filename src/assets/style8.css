@@ -1,13 +1,4 @@
 
-body {
-    background-color: #1e1e2f;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
-
 .lobby-container {
     background-color: #2a2a40;
     padding: 2rem;
@@ -18,7 +9,7 @@ body {
     text-align: center;
 }
 
-h1 {
+#lobby {
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
     color: #ff0000;

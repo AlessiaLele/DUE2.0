@@ -68,7 +68,7 @@ const Lobby = () => {
             <button id="back-button" onClick={goBack}>Torna indietro</button>
 
             <main className="lobby-container">
-                <h1>Cerca o Crea una Lobby</h1>
+                <h1 id="lobby">Cerca o Crea una Lobby</h1>
 
                 <form id="lobby-form" className="lobby-form" onSubmit={handleSearch}>
                     <label htmlFor="lobby-name">Nome della Lobby:</label>

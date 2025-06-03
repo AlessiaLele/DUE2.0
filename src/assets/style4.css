@@ -1,14 +1,4 @@
-body {
-    background: linear-gradient(to bottom, #e0f7fa, #80deea);
-    background-size: cover;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    text-align: center;
-}
-
-
-/* Titolo principale */
+/*Titolo principale */
 h1 {
     color: #333;
     margin-top: 20px;
@@ -20,6 +10,7 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 400px;
 }
 /*Creo delle sezioni per una questione ottica*/
 .bot-hand, .table, .player-hand {
@@ -82,10 +73,8 @@ h1 {
 /*Bottone exit*/
 #exit-btn {
     position: fixed;
-    top: 10px;
-    left: 10px;
-    display: inline-block;
-    width: auto;
+    top: 20px;
+    left: 20px;
     background: linear-gradient(45deg, #ff0066, #ffcc00);
     color: white;
     font-weight: bold;
@@ -102,7 +91,7 @@ h1 {
 
 #exit-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 30px #ffcc00;
+    box-shadow: 0 0 15px #ff0066, 0 0 30px #ffcc00;
 }
 
 /*Popup bottone exit*/
@@ -156,7 +145,6 @@ h1 {
 
 .popup-buttons button:hover {
     transform: scale(1.1);
-    width: auto;
 }
 
 /*Pescare dal mazzo*/
@@ -222,3 +210,18 @@ h1 {
     margin-right: 10px; /* Spazio tra pulsante e mazzo */
 }
 
+.due-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #b5ddcb;
+    color: #fff;
+    padding: 40px 60px;
+    font-size: 48px;
+    font-weight: bold;
+    border: 5px solid #000000;
+    border-radius: 20px;
+    z-index: 3000;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}

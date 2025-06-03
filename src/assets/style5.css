@@ -1,20 +1,10 @@
-.mode-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to right, #74ebd5, #acb6e5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
 .mode-container {
     background-color: white;
     border-radius: 20px;
     padding: 40px;
     text-align: center;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    width: 90%;
+    width: 100%;
     max-width: 500px;
 }
 

@@ -1,21 +1,12 @@
-.menu-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to right, #ff6f61, #ffcc70);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
 .menu-container {
     background-color: white;
     border-radius: 20px;
     padding: 40px;
     text-align: center;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 400px;
+    width: 100%;
+    min-width: 300px;
+    margin: 0 auto;
 }
 
 .menu-container h1 {

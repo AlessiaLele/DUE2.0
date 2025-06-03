@@ -1,9 +1,18 @@
-import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/style4.css';
+import React, { useEffect, useState } from 'react';
+
 
 function Singleplayer() {
     const navigate = useNavigate();
+    const [showDuePopup, setShowDuePopup] = useState(false);
+
+    const handleDueClick = () => {
+        setShowDuePopup(true);
+        setTimeout(() => {
+            setShowDuePopup(false);
+        }, 2000); // mostra per 10 secondi
+    };
 
     useEffect(() => {
         const updateButtonState = () => {
@@ -15,6 +24,7 @@ function Singleplayer() {
         };
 
         updateButtonState();
+
 
         const observer = new MutationObserver(updateButtonState);
         const playerHand = document.getElementById('player-hand');
@@ -39,13 +49,14 @@ function Singleplayer() {
     };
 
     const confermaUscita = () => {
-        navigate('/menu-page');
+        navigate('/menu-page'); // <-- Percorso SPA corretto
     };
 
+
     return (
-        <div>
+        <div className="singleplayer">
             <button id="exit-btn" onClick={apriPopup}>Esci</button>
-            <button id="action-button" disabled={true}>2</button>
+
 
             <div id="overlay" onClick={chiudiPopup}></div>
 
@@ -64,7 +75,7 @@ function Singleplayer() {
             <div className="game-container">
                 <div className="bot-hand" id="bot-hand">
                     <div className="card-back"></div>
-                    <div className="card-back"></div>
+
                     <img src="/assets/cards/cartaCoperta.png" alt="card-back" />
                 </div>
 
@@ -84,6 +95,13 @@ function Singleplayer() {
                     <h2>Le tue carte</h2>
                     <img src="/assets/cards/0rosso.png" alt="0rosso" />
                 </div>
+
+                <button id="action-button" onClick={handleDueClick}>2</button>
+                {showDuePopup && (
+                    <div className="due-popup">
+                        <h1>DUE!!!</h1>
+                    </div>
+                )}
             </div>
         </div>
     );

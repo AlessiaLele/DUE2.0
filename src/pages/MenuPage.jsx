@@ -23,15 +23,15 @@ const MenuPage = () => {
     };
 
     return (
-        <div className="menu-body">
-            <div className="menu-container">
-                <h1>DUE</h1>
-                <button className="menu-button" onClick={startGame}>▶️ Gioca</button>
-                <button className="menu-button secondary" onClick={goToSettings}>⚙️ Impostazioni</button>
-                <button className="menu-button secondary" onClick={showInstructions}>❓ Istruzioni</button>
-                <button className="menu-button danger" onClick={exitGame}>↩️ Log Out</button>
-            </div>
+
+        <div className="menu-container">
+            <h1>DUE</h1>
+            <button className="menu-button" onClick={startGame}>▶️ Gioca</button>
+            <button className="menu-button secondary" onClick={goToSettings}>⚙️ Impostazioni</button>
+            <button className="menu-button secondary" onClick={showInstructions}>❓ Istruzioni</button>
+            <button className="menu-button danger" onClick={exitGame}>↩️ Log Out</button>
         </div>
+
     );
 };
 

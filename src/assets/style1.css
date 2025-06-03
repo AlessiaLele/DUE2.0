@@ -1,29 +1,41 @@
-body {
+html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+/* Container principale */
+.container {
     height: 100vh;
+    width: 100vw;
     background: linear-gradient(165deg, #667cea, #4243aa);
     display: flex;
     flex-direction: column;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Header */
 header {
     font-size: 3rem;
-    margin: 20px 30px ;
+    margin: 20px 30px;
     text-align: left;
     color: #000000;
 }
+
+/* Centro */
 .center {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
+/* Pulsante */
 .button {
     font-size: 1.5em;
     padding: 10px 30px;
-    border: #2c3e50 0.5px solid ;
+    border: #2c3e50 0.5px solid;
     border-radius: 10px;
     background-color: #005a8b;
     color: black;

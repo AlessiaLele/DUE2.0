@@ -51,6 +51,7 @@ function Login() {
                 {isLogin ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
             </div>
         </div>
+
     );
 }
 
