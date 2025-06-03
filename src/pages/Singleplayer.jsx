@@ -39,7 +39,7 @@ function Singleplayer() {
     };
 
     const confermaUscita = () => {
-        navigate('/menu-page'); // <-- Percorso SPA corretto
+        navigate('/menu-page');
     };
 
     return (

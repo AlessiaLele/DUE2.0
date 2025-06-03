@@ -82,8 +82,10 @@ h1 {
 /*Bottone exit*/
 #exit-btn {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 10px;
+    left: 10px;
+    display: inline-block;
+    width: auto;
     background: linear-gradient(45deg, #ff0066, #ffcc00);
     color: white;
     font-weight: bold;
@@ -100,7 +102,7 @@ h1 {
 
 #exit-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 15px #ff0066, 0 0 30px #ffcc00;
+    box-shadow: 0 0 30px #ffcc00;
 }
 
 /*Popup bottone exit*/
@@ -154,6 +156,7 @@ h1 {
 
 .popup-buttons button:hover {
     transform: scale(1.1);
+    width: auto;
 }
 
 /*Pescare dal mazzo*/
