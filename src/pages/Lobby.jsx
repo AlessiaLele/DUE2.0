@@ -6,7 +6,7 @@ const Lobby = () => {
     const navigate = useNavigate();
 
     const goBack = () => {
-    navigate("/game-mode");
+    navigate("/menu-page");
     };
 
     return (
