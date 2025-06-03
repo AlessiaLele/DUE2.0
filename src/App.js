@@ -7,6 +7,7 @@ import GameMode from "./pages/GameMode";
 import Singleplayer from "./pages/Singleplayer";
 import Settings from "./pages/Settings"
 import Instructions from "./pages/Instructions";
+import Lobby from "./pages/Lobby";
 
 function App() {
     return (
@@ -19,6 +20,7 @@ function App() {
                 <Route path="/singleplayer" element={<Singleplayer />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/instructions" element={<Instructions />} />
+                <Route path="/multiplayer" element={<Lobby />} />
             </Routes>
         </Router>
     );
