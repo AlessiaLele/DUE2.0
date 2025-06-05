@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/style2.css';
+import axios from 'axios';
 
 function Login() {
     const [isLogin, setIsLogin] = useState(true);
@@ -9,17 +10,47 @@ function Login() {
     const toggleForms = () => {
         setIsLogin(!isLogin);
     };
-    const handleLogin = (e) => {
+
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // qui potresti validare il login con fetch / axios
-        // per ora simula un successo:
-        navigate('/menu-page');
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/login', {
+                email,
+                password,
+            });
+            console.log(response.data);
+            navigate('/menu-page');
+        } catch (err) {
+            console.error('Errore nel login:', err);
+            const msg = err.response?.data?.error || 'Errore imprevisto durante il login';
+            alert('Errore nel login: ' + msg);
+        }
+
     };
 
-    const handleRegister = (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
-        // anche qui potresti inviare i dati al server
-        navigate('/menu-page');
+        const username = e.target.username.value;
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/register', {
+                username,
+                email,
+                password,
+            });
+            console.log(response.data);
+            navigate('/menu-page');
+        } catch (err) {
+            console.error('Errore nella registrazione:', err);
+            const msg = err.response?.data?.error || 'Errore imprevisto durante la registrazione';
+            alert('Errore nella registrazione: ' + msg);
+        }
+
     };
 
     return (
