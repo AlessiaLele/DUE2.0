@@ -51,6 +51,7 @@ function Login() {
             alert('Errore nella registrazione: ' + msg);
         }
 
+
     };
 
     return (

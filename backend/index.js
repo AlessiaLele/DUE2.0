@@ -51,7 +51,6 @@ app.post('/api/login', (req, res) => {
 
     res.json({ message: 'Login riuscito', user });
 });
-
 app.listen(port, () => {
     console.log(`✅ Server in ascolto su http://localhost:${port}`);
 });
