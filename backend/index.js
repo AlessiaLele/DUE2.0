@@ -1,4 +1,4 @@
-/*const cors = require('cors');
+const cors = require('cors');
 
 // Configura CORS direttamente
 app.use(cors({
@@ -54,4 +54,4 @@ app.post('/api/login', (req, res) => {
 
 app.listen(port, () => {
     console.log(`✅ Server in ascolto su http://localhost:${port}`);
-});*/
+});
