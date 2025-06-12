@@ -11,48 +11,67 @@ function Login() {
         setIsLogin(!isLogin);
     };
 
+    const goahead = () => {
+        navigate("/menu-page");
+    };
     const handleLogin = async (e) => {
         e.preventDefault();
-        const email = e.target.email.value;
-        const password = e.target.password.value;
+        const formData = new FormData(e.target);
+        const body = {
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
 
         try {
-            const response = await axios.post('http://localhost:5000/api/login', {
-                email,
-                password,
+            const res = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
-            console.log(response.data);
-            navigate('/menu-page');
-        } catch (err) {
-            console.error('Errore nel login:', err);
-            const msg = err.response?.data?.error || 'Errore imprevisto durante il login';
-            alert('Errore nel login: ' + msg);
-        }
 
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                alert(`Benvenuto, ${data.username}`);
+                navigate('/menu-page'); // cambia con la tua route
+            } else {
+                alert(data.msg);
+            }
+        } catch (err) {
+            alert('Errore di rete');
+        }
     };
+
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        const username = e.target.username.value;
-        const email = e.target.email.value;
-        const password = e.target.password.value;
+        const formData = new FormData(e.target);
+        const body = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
 
         try {
-            const response = await axios.post('http://localhost:5000/api/register', {
-                username,
-                email,
-                password,
+            const res = await fetch('http://localhost:3000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
-            console.log(response.data);
-            navigate('/menu-page');
+
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.msg);
+                setIsLogin(true);
+                navigate('/menu-page');
+            } else {
+                alert(data.msg);
+            }
         } catch (err) {
-            console.error('Errore nella registrazione:', err);
-            const msg = err.response?.data?.error || 'Errore imprevisto durante la registrazione';
-            alert('Errore nella registrazione: ' + msg);
+            alert('Errore di rete');
         }
-
-
     };
+
 
     return (
         <div className="login">
@@ -65,7 +84,7 @@ function Login() {
             >
                 <input type="email" name="email" placeholder="Email" required />
                 <input type="password" name="password" placeholder="Password" required />
-                <button type="submit">Accedi</button>
+                <button type="submit" >Accedi</button>
             </form>
 
             <form
@@ -76,7 +95,7 @@ function Login() {
                 <input type="text" name="username" placeholder="Username" required />
                 <input type="email" name="email" placeholder="Email" required />
                 <input type="password" name="password" placeholder="Password" required />
-                <button type="submit">Registrati</button>
+                <button type="submit"  >Registrati</button>
             </form>
 
             <div className="toggle-link" onClick={toggleForms}>
