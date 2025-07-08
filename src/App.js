@@ -8,6 +8,7 @@ import Singleplayer from "./pages/Singleplayer";
 import Settings from "./pages/Settings"
 import Instructions from "./pages/Instructions";
 import Lobby from "./pages/Lobby";
+import GameLobby from './pages/GameLobby';
 
 function App() {
     return (
@@ -21,6 +22,7 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/instructions" element={<Instructions />} />
                 <Route path="/multiplayer" element={<Lobby />} />
+                <Route path="/game/:lobbyName" element={<GameLobby />} />
             </Routes>
         </Router>
     );

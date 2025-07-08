@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import '../assets/style8.css';
 
-// Simulazione di lobby (in assenza di un backend)
-const fakeLobbies = [
-    { name: 'Alpha', players: 2 },
-    { name: 'Bravo', players: 3 },
-    { name: 'Charlie', players: 1 }
-];
+const fakeLobbies = [];
 
 const Lobby = () => {
     const navigate = useNavigate();
@@ -21,35 +16,40 @@ const Lobby = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         const found = fakeLobbies.find(lobby => lobby.name.toLowerCase() === lobbyName.toLowerCase());
-
         if (found) {
             setMessage(`Lobby trovata: ${found.name} con ${found.players} giocatori`);
-            // In caso reale: navigate(`/game/${found.name}`);
         } else {
             setMessage("Nessuna lobby trovata con quel nome.");
         }
     };
 
     const handleCreateLobby = () => {
-        if (!lobbyName) {
-            setMessage("Inserisci un nome per creare una lobby.");
+        const name = prompt("Inserisci il nome univoco della lobby:");
+        if (!name) {
+            setMessage("Nome non valido.");
             return;
         }
-
-        const exists = fakeLobbies.some(lobby => lobby.name.toLowerCase() === lobbyName.toLowerCase());
+        const exists = fakeLobbies.some(lobby => lobby.name.toLowerCase() === name.toLowerCase());
         if (exists) {
             setMessage("Una lobby con questo nome esiste già.");
         } else {
-            fakeLobbies.push({ name: lobbyName, players: 1 });
-            setMessage(`Lobby "${lobbyName}" creata!`);
-            // In caso reale: navigate(`/game/${lobbyName}`);
+            fakeLobbies.push({ name: name, players: 1 });
+            navigate(`/game/${name}`);
         }
     };
 
     const handleJoinByLink = () => {
-        const linkLobby = "LinkLobby"; // simulazione
-        setMessage(`Unito alla lobby tramite link: ${linkLobby}`);
-        // In caso reale: navigate(`/game/${linkLobby}`);
+        const userLink = prompt("Incolla qui il link della lobby:");
+        if (!userLink) return;
+
+        const name = userLink.split("/").pop();
+        const found = fakeLobbies.find(lobby => lobby.name === name);
+        if (found) {
+            found.players += 1;
+            navigate(`/game/${name}`);
+        } else {
+            setMessage("Nessuna lobby trovata con questo link.");
+        }
     };
 
     const handleJoinRandom = () => {
@@ -57,20 +57,17 @@ const Lobby = () => {
             setMessage("Nessuna lobby disponibile.");
             return;
         }
-
         const random = fakeLobbies[Math.floor(Math.random() * fakeLobbies.length)];
-        setMessage(`Unito alla lobby casuale: ${random.name}`);
-        // In caso reale: navigate(`/game/${random.name}`);
+        random.players += 1;
+        navigate(`/game/${random.name}`);
     };
 
     return (
         <>
             <button id="back-button" onClick={goBack}>Torna indietro</button>
-
             <main className="lobby-container">
                 <h1 id="lobby">Cerca o Crea una Lobby</h1>
-
-                <form id="lobby-form" className="lobby-form" onSubmit={handleSearch}>
+                <form id="lobby-form" onSubmit={handleSearch}>
                     <label htmlFor="lobby-name">Nome della Lobby:</label>
                     <input
                         id="lobby-name"
@@ -78,7 +75,6 @@ const Lobby = () => {
                         placeholder="Inserisci il nome..."
                         value={lobbyName}
                         onChange={(e) => setLobbyName(e.target.value)}
-                        required
                     />
                     <button type="submit">Cerca Lobby</button>
                 </form>
