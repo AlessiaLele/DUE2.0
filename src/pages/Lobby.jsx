@@ -41,7 +41,7 @@ function Lobby() {
         if (!nome) return;
 
         const username = localStorage.getItem('username');
-        const res = await fetch('http://localhost:3001/api/lobby/create', {
+        const res = await fetch('http://localhost:3000/api/lobby/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: nome, username })
