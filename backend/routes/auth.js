@@ -5,7 +5,7 @@ const User = require('../models/User');
 
 const router = express.Router();
 //const JWT_SECRET1="chiave-segreta-super-sicura";
-// REGISTRAZIONE
+// REGISTRAZIONE o controller
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 

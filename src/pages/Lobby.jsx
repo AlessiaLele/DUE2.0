@@ -1,65 +1,98 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
-import '../assets/style8.css';
+import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
 
-const fakeLobbies = [];
+const socket = io('http://localhost:3000'); // Assicurati che la porta sia corretta
 
-const Lobby = () => {
-    const navigate = useNavigate();
+function Lobby() {
     const [lobbyName, setLobbyName] = useState('');
     const [message, setMessage] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [newLobbyName, setNewLobbyName] = useState('');
+    const navigate = useNavigate();
 
     const goBack = () => {
-        navigate("/menu-page");
+        navigate('/menu-page');
     };
 
-    const handleSearch = (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
-        const found = fakeLobbies.find(lobby => lobby.name.toLowerCase() === lobbyName.toLowerCase());
-        if (found) {
-            setMessage(`Lobby trovata: ${found.name} con ${found.players} giocatori`);
-        } else {
-            setMessage("Nessuna lobby trovata con quel nome.");
-        }
-    };
-
-    const handleCreateLobby = () => {
-        const name = prompt("Inserisci il nome univoco della lobby:");
-        if (!name) {
-            setMessage("Nome non valido.");
+        if (!lobbyName.trim()) {
+            setMessage("Inserisci un nome di lobby.");
             return;
         }
-        const exists = fakeLobbies.some(lobby => lobby.name.toLowerCase() === name.toLowerCase());
-        if (exists) {
-            setMessage("Una lobby con questo nome esiste già.");
-        } else {
-            fakeLobbies.push({ name: name, players: 1 });
-            navigate(`/game/${name}`);
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/lobby/${lobbyName}`);
+            const data = await res.json();
+
+            if (res.ok && data.lobby) {
+                navigate(`/game-lobby/${lobbyName}`);
+            } else {
+                setMessage("Lobby non trovata.");
+            }
+        } catch (err) {
+            setMessage("Errore durante la ricerca della lobby.");
         }
+    };
+
+    const handleCreateLobby = async () => {
+        const nome = prompt("Inserisci il nome della lobby:");
+        if (!nome) return;
+
+        const username = localStorage.getItem('username');
+        const res = await fetch('http://localhost:3001/api/lobby/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: nome, username })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            navigate(`/game-lobby/${nome}`);
+        } else {
+            alert(data.msg);
+        }
+    };
+
+
+    const confirmCreateLobby = () => {
+        if (!newLobbyName.trim()) {
+            setMessage("Il nome della lobby non può essere vuoto.");
+            return;
+        }
+
+        socket.emit('join-lobby', {
+            lobbyName: newLobbyName,
+            username: localStorage.getItem('username') || 'Giocatore'
+        });
+
+        setShowModal(false);
+        setNewLobbyName('');
+        navigate(`/game-lobby/${newLobbyName}`);
     };
 
     const handleJoinByLink = () => {
-        const userLink = prompt("Incolla qui il link della lobby:");
-        if (!userLink) return;
-
-        const name = userLink.split("/").pop();
-        const found = fakeLobbies.find(lobby => lobby.name === name);
-        if (found) {
-            found.players += 1;
-            navigate(`/game/${name}`);
-        } else {
-            setMessage("Nessuna lobby trovata con questo link.");
+        const link = prompt("Incolla il link della lobby:");
+        if (link) {
+            const parts = link.split('/');
+            const name = parts[parts.length - 1];
+            if (name) {
+                setLobbyName(name);
+                navigate(`/game-lobby/${name}`);
+            } else {
+                setMessage("Link non valido.");
+            }
         }
     };
 
     const handleJoinRandom = () => {
-        if (fakeLobbies.length === 0) {
-            setMessage("Nessuna lobby disponibile.");
-            return;
-        }
-        const random = fakeLobbies[Math.floor(Math.random() * fakeLobbies.length)];
-        random.players += 1;
-        navigate(`/game/${random.name}`);
+        const randomName = 'lobby-' + Math.random().toString(36).substring(7);
+        socket.emit('join-lobby', {
+            lobbyName: randomName,
+            username: localStorage.getItem('username') || 'Giocatore'
+        });
+        navigate(`/game-lobby/${randomName}`);
     };
 
     return (
@@ -67,6 +100,7 @@ const Lobby = () => {
             <button id="back-button" onClick={goBack}>Torna indietro</button>
             <main className="lobby-container">
                 <h1 id="lobby">Cerca o Crea una Lobby</h1>
+
                 <form id="lobby-form" onSubmit={handleSearch}>
                     <label htmlFor="lobby-name">Nome della Lobby:</label>
                     <input
@@ -88,8 +122,27 @@ const Lobby = () => {
                 <p className="player-info">Giocatori richiesti: 4</p>
                 {message && <p style={{ marginTop: '1rem', color: 'lightgreen' }}>{message}</p>}
             </main>
+
+            {/* POPUP PER CREAZIONE LOBBY */}
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>Nome della nuova Lobby</h2>
+                        <input
+                            type="text"
+                            value={newLobbyName}
+                            onChange={(e) => setNewLobbyName(e.target.value)}
+                            placeholder="Es. Stanza123"
+                        />
+                        <div className="modal-buttons">
+                            <button onClick={confirmCreateLobby}>Conferma</button>
+                            <button onClick={() => setShowModal(false)}>Annulla</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
-};
+}
 
 export default Lobby;

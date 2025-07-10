@@ -11,9 +11,7 @@ function Login() {
         setIsLogin(!isLogin);
     };
 
-    const goahead = () => {
-        navigate("/menu-page");
-    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -32,6 +30,7 @@ function Login() {
             const data = await res.json();
             if (res.ok) {
                 localStorage.setItem('token', data.token);
+
                 alert(`Benvenuto, ${data.username}`);
                 navigate('/menu-page'); // cambia con la tua route
             } else {
