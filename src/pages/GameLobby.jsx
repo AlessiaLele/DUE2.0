@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:3000'); // Assicurati sia la porta giusta
-
+// Connessione a Socket.IO sul backend (porta 3000)
+const socket = io('http://localhost:3000');
 const GameLobby = () => {
     const { lobbyName } = useParams();
     const navigate = useNavigate();
@@ -12,37 +12,44 @@ const GameLobby = () => {
 
     useEffect(() => {
         if (!lobbyName) return;
-
+        // Genera link per la condivisione
         const generatedLink = `${window.location.origin}/game-lobby/${lobbyName}`;
         setLink(generatedLink);
 
+        // Nome utente salvato nel localStorage
         const username = localStorage.getItem('username') || 'Giocatore';
-
-        socket.emit('join-lobby', { lobbyName, username });
+        // Entra nella lobby (server Socket.IO si aspetta { name, username })
+        socket.emit('join-lobby', { name: lobbyName, username });
+        // Ascolta aggiornamenti della lobby
 
         socket.on('lobby-update', (data) => {
             setPlayers(data.players);
+
+            // Se almeno 4 giocatori, vai alla partita
             if (data.players.length >= 4) {
                 navigate('/multiplayer');
             }
         });
 
+        // Gestione errori di connessione
         socket.on('connect_error', (err) => {
             console.error('Errore di connessione socket:', err.message);
         });
 
+        // Pulisci listener
         return () => {
             socket.off('lobby-update');
         };
     }, [lobbyName, navigate]);
 
+    // Copia link negli appunti
     const handleCopyLink = () => {
         navigator.clipboard.writeText(link);
-        alert("Link copiato!");
+        alert('Link copiato!');
     };
 
     return (
-        <main className="game-lobby">
+        <div>
             <h1>Lobby: {lobbyName}</h1>
             <h2>Giocatori connessi: {players.length}</h2>
             <ul>
@@ -50,11 +57,26 @@ const GameLobby = () => {
                     <li key={index}>{p}</li>
                 ))}
             </ul>
-            <p>Condividi questo link per invitare altri giocatori:</p>
-            <p>{link}</p>
-            <button onClick={handleCopyLink}>Copia link</button>
-        </main>
+            <div>
+                <p>Condividi questo link per invitare altri giocatori:</p>
+                <div>
+                    <input
+                        type="text"
+                        readOnly
+                        value={link}
+                    />
+                    <button
+                        onClick={handleCopyLink}
+                        className="bottone-link"
+                    >
+                        Copia link
+                    </button>
+                </div>
+            </div>
+        </div>
+
     );
 };
 
 export default GameLobby;
+

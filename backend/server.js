@@ -1,32 +1,30 @@
+// backend/server.js
+
 require('dotenv').config();
 
-const express = require('express');
-const http = require('http');
+const express  = require('express');
+
+const http     = require('http');
+
 const { Server } = require('socket.io');
 
 const mongoose = require('mongoose');
 
-const cors = require('cors');
+const cors     = require('cors');
 
 // Routes
 
-const authRoutes = require('./routes/auth');
+const authRoutes  = require('./routes/auth');
 
 const lobbyRoutes = require('./routes/lobby');
 
-const app = express();
+const app    = express();
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
+const io     = new Server(server, {
 
-    cors: {
-
-        origin: '*',
-
-        methods: ['GET', 'POST']
-
-    }
+    cors: { origin: '*' }
 
 });
 
@@ -36,17 +34,13 @@ app.use(cors());
 
 app.use(express.json());
 
-// API routes
-
 app.use('/api/auth', authRoutes);
 
 app.use('/api/lobby', lobbyRoutes);
 
-// MongoDB connection
+// Connect to MongoDB
 
-toConnectDB();
-
-async function toConnectDB() {
+(async function connectDB() {
 
     try {
 
@@ -68,22 +62,18 @@ async function toConnectDB() {
 
     }
 
-}
+})();
 
-// In-memory lobby state
+// In-memory state
 
 const lobbies = {};
 
-// Socket.IO
-
 io.on('connection', (socket) => {
 
-    console.log('Nuovo client connesso:', socket.id);
+    console.log('Client connesso:', socket.id);
 
     socket.on('create-lobby', async ({ name, username }) => {
-
-        // Salvo su DB
-
+        console.log(`🛠 create-lobby ricevuto da ${socket.id}:`, name, username);
         const Lobby = require('./models/Lobby');
 
         try {
@@ -91,6 +81,8 @@ io.on('connection', (socket) => {
             let lobby = await Lobby.findOne({ name });
 
             if (lobby) return socket.emit('error', { msg: 'Lobby già esistente' });
+
+            // Save to DB
 
             lobby = new Lobby({ name, players: [username] });
 
@@ -102,7 +94,11 @@ io.on('connection', (socket) => {
 
             socket.join(name);
 
-            socket.emit('lobby-created', { name, players: [username] });
+            // Emit initial update
+
+            const playersArray = Array.from(lobbies[name]);
+
+            io.to(name).emit('lobby-update', { players: playersArray });
 
         } catch (err) {
 
@@ -115,7 +111,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('join-lobby', async ({ name, username }) => {
-
+        console.log(`🚪 join-lobby ricevuto da ${socket.id}:`, name, username);
         const Lobby = require('./models/Lobby');
 
         try {
@@ -124,7 +120,7 @@ io.on('connection', (socket) => {
 
             if (!lobby) return socket.emit('error', { msg: 'Lobby non trovata' });
 
-            // DB update
+            // Update DB
 
             if (!lobby.players.includes(username)) {
 
@@ -134,7 +130,7 @@ io.on('connection', (socket) => {
 
             }
 
-            // In-memory update
+            // In-memory
 
             if (!lobbies[name]) lobbies[name] = new Set();
 
@@ -142,7 +138,7 @@ io.on('connection', (socket) => {
 
             socket.join(name);
 
-            // Broadcast update
+            // Emit updated list
 
             const playersArray = Array.from(lobbies[name]);
 
@@ -162,13 +158,11 @@ io.on('connection', (socket) => {
 
         console.log('Client disconnesso:', socket.id);
 
-        // Possibile pulizia in-memory se serve
-
     });
 
 });
 
-// Avvio server
+// Start server
 
 const PORT = process.env.PORT || 3000;
 
@@ -177,4 +171,5 @@ server.listen(PORT, () => {
     console.log(`Server avviato sulla porta ${PORT}`);
 
 });
+
 

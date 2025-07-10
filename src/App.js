@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import WelcomePage from "./pages/WelcomePage";
 import Login from "./pages/Login";
 import MenuPage from "./pages/MenuPage";
@@ -22,7 +23,7 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/instructions" element={<Instructions />} />
                 <Route path="/multiplayer" element={<Lobby />} />
-                <Route path="/game/:lobbyName" element={<GameLobby />} />
+                <Route path="/game-lobby/:lobbyName" element={<GameLobby />} />
             </Routes>
         </Router>
     );

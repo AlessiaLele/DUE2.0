@@ -49,28 +49,13 @@ function Lobby() {
 
         const data = await res.json();
         if (res.ok) {
+            socket.emit('create-lobby', { name: nome, username });
             navigate(`/game-lobby/${nome}`);
         } else {
             alert(data.msg);
         }
     };
 
-
-    const confirmCreateLobby = () => {
-        if (!newLobbyName.trim()) {
-            setMessage("Il nome della lobby non può essere vuoto.");
-            return;
-        }
-
-        socket.emit('join-lobby', {
-            lobbyName: newLobbyName,
-            username: localStorage.getItem('username') || 'Giocatore'
-        });
-
-        setShowModal(false);
-        setNewLobbyName('');
-        navigate(`/game-lobby/${newLobbyName}`);
-    };
 
     const handleJoinByLink = () => {
         const link = prompt("Incolla il link della lobby:");
