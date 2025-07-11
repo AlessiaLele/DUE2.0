@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
 // Connessione a Socket.IO sul backend (porta 3000)
-const socket = io('http://localhost:3000');
+const socket = io('http://localhost:5000');
 const GameLobby = () => {
     const { lobbyName } = useParams();
     const navigate = useNavigate();
@@ -36,9 +36,17 @@ const GameLobby = () => {
             console.error('Errore di connessione socket:', err.message);
         });
 
+        socket.on('lobby-full', ({ msg }) => {
+            alert(msg || 'La lobby è piena.');
+            navigate('/lobby');  // torna al menu, ad esempio
+             });
+
         // Pulisci listener
         return () => {
             socket.off('lobby-update');
+            socket.off('connect_error');
+            socket.off('lobby-full');
+            socket.disconnect();
         };
     }, [lobbyName, navigate]);
 

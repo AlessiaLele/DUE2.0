@@ -92,6 +92,9 @@ io.on('connection', (socket) => {
 
             lobbies[name] = new Set([username]);
 
+            socket.data.username  = username;
+            socket.data.lobbyName = name;
+
             socket.join(name);
 
             // Emit initial update
@@ -120,6 +123,11 @@ io.on('connection', (socket) => {
 
             if (!lobby) return socket.emit('error', { msg: 'Lobby non trovata' });
 
+            if (!lobbies[name]) lobbies[name] = new Set();
+
+            if (lobbies[name].size >= 4) {
+                return socket.emit('lobby-full', { msg: 'La lobby è piena' });
+            }
             // Update DB
 
             if (!lobby.players.includes(username)) {
@@ -129,10 +137,8 @@ io.on('connection', (socket) => {
                 await lobby.save();
 
             }
-
-            // In-memory
-
-            if (!lobbies[name]) lobbies[name] = new Set();
+            socket.data.username  = username;
+            socket.data.lobbyName = name;
 
             lobbies[name].add(username);
 
@@ -164,7 +170,7 @@ io.on('connection', (socket) => {
 
 // Start server
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
 

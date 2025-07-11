@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:3000'); // Assicurati che la porta sia corretta
+const socket = io('http://localhost:5000'); // Assicurati che la porta sia corretta
+
+socket.on('lobby-full', ({ msg }) => {
+    alert(msg || 'La lobby è piena.');
+});
 
 function Lobby() {
     const [lobbyName, setLobbyName] = useState('');
