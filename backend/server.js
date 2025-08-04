@@ -31,11 +31,8 @@ const io     = new Server(server, {
 // Middlewares
 
 app.use(cors());
-
 app.use(express.json());
-
 app.use('/api/auth', authRoutes);
-
 app.use('/api/lobby', lobbyRoutes);
 
 // Connect to MongoDB
@@ -163,19 +160,13 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
 
         console.log('Client disconnesso:', socket.id);
-
     });
-
 });
 
 // Start server
 
-const PORT = process.env.PORT || 5000;
-
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-
     console.log(`Server avviato sulla porta ${PORT}`);
-
 });
-
 

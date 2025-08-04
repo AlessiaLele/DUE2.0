@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import io from 'socket.io-client';
+import {io} from 'socket.io-client';
 
 // Connessione a Socket.IO sul backend (porta 3000)
-const socket = io('http://localhost:5000');
+const socket = io('http://localhost:3000');
 const GameLobby = () => {
     const { lobbyName } = useParams();
     const navigate = useNavigate();
     const [players, setPlayers] = useState([]);
     const [link, setLink] = useState('');
+
 
     useEffect(() => {
         if (!lobbyName) return;
