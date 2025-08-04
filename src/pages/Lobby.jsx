@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000'); // Assicurati che la porta sia corretta
+const socket = io('http://localhost:3000');
 
 socket.on('lobby-full', ({ msg }) => {
     alert(msg || 'La lobby è piena.');
@@ -83,6 +83,48 @@ function Lobby() {
         });
         navigate(`/game-lobby/${randomName}`);
     };
+
+    const confirmCreateLobby = async () => {
+
+        if (!newLobbyName.trim()) {
+
+            alert('Inserisci un nome valido');
+
+            return;
+
+        }
+
+        const username = localStorage.getItem('username');
+
+        // fai la POST al tuo backend
+
+        const res = await fetch('http://localhost:5000/api/lobby/create', {
+
+            method: 'POST',
+
+            headers: { 'Content-Type': 'application/json' },
+
+            body: JSON.stringify({ name: newLobbyName, username })
+
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+
+            alert(data.msg);
+
+            return;
+
+        }
+        // emetto il create-lobby su socket.io
+        socket.emit('create-lobby', { name: newLobbyName, username });
+        // chiudo modal e navigo
+        setShowModal(false);
+        navigate(`/game-lobby/${newLobbyName}`);
+    };
+
+
 
     return (
         <>
