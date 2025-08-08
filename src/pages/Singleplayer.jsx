@@ -1,174 +1,29 @@
 import { useNavigate } from 'react-router-dom';
 import '../assets/style4.css';
-import React, { useEffect, useState } from 'react';
-import { creaMazzo, pescaCarta } from '../utils/deck.js';
+import React, { useState, useEffect } from "react";
 
-function Singleplayer() {
+const GRID_SIZE = 10;
+const LETTERS = "ABCDEFGHIJ".split("");
+
+// Configurazione iniziale delle navi
+const INITIAL_SHIPS = [
+    { size: 5, count: 1 },
+    { size: 4, count: 1 },
+    { size: 3, count: 2 },
+    { size: 2, count: 1 }
+];
+
+const BattleshipGame = () => {
+    const [playerGrid, setPlayerGrid] = useState(createEmptyGrid());
+    const [botGrid, setBotGrid] = useState(createEmptyGrid());
+    const [isPlacing, setIsPlacing] = useState(true);
+    const [orientation, setOrientation] = useState("horizontal");
+    const [draggedShipSize, setDraggedShipSize] = useState(null);
+    const [placementTimeLeft, setPlacementTimeLeft] = useState(30);
+    const [message, setMessage] = useState("");
+    const [playerTurn, setPlayerTurn] = useState(false);
+    const [availableShips, setAvailableShips] = useState(INITIAL_SHIPS);
     const navigate = useNavigate();
-    const [mazzo, setMazzo] = useState([]);
-    const [scarti, setScarti] = useState([]);
-    const [giocatore, setGiocatore] = useState([]);
-    const [bot, setBot] = useState([]);
-    const [turnoGiocatore, setTurnoGiocatore] = useState(true);
-    const [showDuePopup, setShowDuePopup] = useState(false);
-    const [fineGioco, setFineGioco] = useState(false);
-    const [vincitore, setVincitore] = useState(null);
-    const [mostraPopupFinale, setMostraPopupFinale] = useState(false);
-    const [mostraPopupConferma, setMostraPopupConferma] = useState(false);
-    const [saltaTurno, setSaltaTurno] = useState(false);
-    const [ordineInverso, setOrdineInverso] = useState(false); // in futuro utile per multiplayer
-
-
-
-
-    // inizializzazione gioco
-    useEffect(() => {
-        const nuovoMazzo = creaMazzo();
-        const manoGiocatore = Array.from({ length: 7 }, () => pescaCarta(nuovoMazzo));
-        const manoBot = Array.from({ length: 7 }, () => pescaCarta(nuovoMazzo));
-        const cartaIniziale = pescaCarta(nuovoMazzo);
-
-        setGiocatore(manoGiocatore);
-        setBot(manoBot);
-        setScarti([cartaIniziale]);
-        setMazzo(nuovoMazzo);
-        setFineGioco(false);
-        setVincitore(null);
-    }, []);
-
-    const handleDueClick = () => {
-        setShowDuePopup(true);
-        setTimeout(() => setShowDuePopup(false), 2000);
-    };
-
-    const pescaDalMazzo = () => {
-        if (!turnoGiocatore || mazzo.length === 0 || fineGioco) return;
-
-        const carta = pescaCarta(mazzo);
-        if (carta) {
-            setGiocatore([...giocatore, carta]);
-            setMazzo([...mazzo]);
-        }
-
-        setTurnoGiocatore(false);
-        setTimeout(turnoBot, 1000);
-    };
-
-
-
-
-
-    const giocaCarta = (carta, index) => {
-        if (fineGioco) return;
-
-        const topScarto = scarti[scarti.length - 1];
-
-        const puòEssereGiocata = (
-            carta.colore === topScarto.colore ||
-            carta.numero === topScarto.numero ||
-            carta.colore === 'nero'
-        );
-
-        if (puòEssereGiocata) {
-            const nuovaMano = [...giocatore];
-            nuovaMano.splice(index, 1);
-            setGiocatore(nuovaMano);
-            setScarti([...scarti, carta]);
-
-            // Esegui effetto speciale
-            switch (carta.numero) {
-                case '+2':
-                    setTimeout(() => {
-                        const nuove = [pescaCarta(mazzo), pescaCarta(mazzo)];
-                        setBot([...bot, ...nuove]);
-                        setMazzo([...mazzo]);
-                    }, 500);
-                    break;
-                case '+4':
-                    setTimeout(() => {
-                        const nuove = [pescaCarta(mazzo), pescaCarta(mazzo), pescaCarta(mazzo), pescaCarta(mazzo)];
-                        setBot([...bot, ...nuove]);
-                        setMazzo([...mazzo]);
-                    }, 500);
-                    break;
-                case '↺':
-                    setOrdineInverso(prev => !prev); // utile in futuro
-                    break;
-                case '⛔':
-                    setSaltaTurno(true);
-                    break;
-            }
-
-            if (nuovaMano.length === 0) {
-                setVincitore("Giocatore");
-                setFineGioco(true);
-                setMostraPopupFinale(true);
-                setTimeout(() => {
-                    setMostraPopupFinale(false);
-                    setMostraPopupConferma(true);
-                }, 3000);
-                return;
-            }
-
-            if (carta.numero !== '+2' && carta.numero !== '+4') {
-                setTurnoGiocatore(false);
-                setTimeout(turnoBot, 1000);
-            } else {
-                setTurnoGiocatore(false);
-                setTimeout(turnoBot, 1500);
-            }
-        }
-    };
-
-
-
-
-
-    const turnoBot = () => {
-        if (fineGioco) return;
-
-        const top = scarti[scarti.length - 1];
-        let nuovaMano = [...bot];
-        let cartaGiocata = null;
-
-        for (let i = 0; i < nuovaMano.length; i++) {
-            if (
-                nuovaMano[i].colore === top.colore ||
-                nuovaMano[i].numero === top.numero
-            ) {
-                cartaGiocata = nuovaMano.splice(i, 1)[0];
-                break;
-            }
-        }
-
-        if (cartaGiocata) {
-            setScarti([...scarti, cartaGiocata]);
-            setBot(nuovaMano);
-
-            if (nuovaMano.length === 0) {
-                setVincitore("Bot");
-                setFineGioco(true);
-                setMostraPopupFinale(true);
-                setTimeout(() => {
-                    setMostraPopupFinale(false);
-                    setMostraPopupConferma(true);
-                }, 3000);
-                return;
-            }
-
-        } else {
-            const pescata = pescaCarta(mazzo);
-            if (pescata) nuovaMano.push(pescata);
-            setBot(nuovaMano);
-            setMazzo([...mazzo]);
-        }
-
-        setTurnoGiocatore(true);
-    };
-
-
-
-
 
     const apriPopup = () => {
         document.getElementById('confirm-popup').style.display = 'block';
@@ -184,94 +39,320 @@ function Singleplayer() {
         navigate('/menu-page');
     };
 
-    return (
-        <div className="singleplayer">
-            <button id="exit-btn" onClick={apriPopup}>Esci</button>
+    useEffect(() => {
+        if (isPlacing && placementTimeLeft > 0) {
+            const timer = setTimeout(
+                () => setPlacementTimeLeft((time) => time - 1),
+                1000
+            );
+            return () => clearTimeout(timer);
+        } else if (isPlacing && placementTimeLeft <= 0) {
+            // Piazzamento automatico delle navi mancanti
+            const completedGrid = placeRemainingShips(playerGrid, availableShips);
+            setPlayerGrid(completedGrid);
 
-            <div id="overlay" onClick={chiudiPopup}></div>
-            <div id="confirm-popup" style={{ display: 'none' }}>
-                <div className="popup-content">
-                    <h2>Sei sicuro di voler uscire?</h2>
-                    <div className="popup-buttons">
-                        <button id="confirm-yes" onClick={confermaUscita}>Sì</button>
-                        <button id="confirm-no" onClick={chiudiPopup}>No</button>
+            // Piazza navi del bot e avvia partita
+            setBotGrid(placeShipsRandomly());
+            setIsPlacing(false);
+            setPlayerTurn(true);
+            setMessage("Tempo scaduto! Le navi rimanenti sono state piazzate automaticamente. La partita inizia!");
+        }
+    }, [isPlacing, placementTimeLeft]);
+
+    function createEmptyGrid() {
+        return Array(GRID_SIZE)
+            .fill(null)
+            .map(() =>
+                Array(GRID_SIZE).fill({ hasShip: false, hit: false })
+            );
+    }
+
+    function placeShipsRandomly() {
+        const grid = createEmptyGrid();
+        for (const ship of INITIAL_SHIPS) {
+            for (let n = 0; n < ship.count; n++) {
+                let placed = false;
+                while (!placed) {
+                    const orientation =
+                        Math.random() < 0.5 ? "horizontal" : "vertical";
+                    const row = Math.floor(Math.random() * GRID_SIZE);
+                    const col = Math.floor(Math.random() * GRID_SIZE);
+
+                    if (canPlaceShip(grid, row, col, ship.size, orientation)) {
+                        for (let i = 0; i < ship.size; i++) {
+                            const r = row + (orientation === "vertical" ? i : 0);
+                            const c = col + (orientation === "horizontal" ? i : 0);
+                            grid[r][c] = { ...grid[r][c], hasShip: true };
+                        }
+                        placed = true;
+                    }
+                }
+            }
+        }
+        return grid;
+    }
+
+    function canPlaceShip(grid, row, col, size, orientation) {
+        for (let i = 0; i < size; i++) {
+            const r = row + (orientation === "vertical" ? i : 0);
+            const c = col + (orientation === "horizontal" ? i : 0);
+            if (r >= GRID_SIZE || c >= GRID_SIZE || grid[r][c].hasShip) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function placeRemainingShips(grid, ships) {
+        // Copia della griglia
+        const newGrid = grid.map(row => row.map(cell => ({ ...cell })));
+
+        // Per ogni tipo di nave ancora disponibile
+        for (const ship of ships) {
+            for (let n = 0; n < ship.count; n++) {
+                let placed = false;
+                while (!placed) {
+                    const orientation = Math.random() < 0.5 ? "horizontal" : "vertical";
+                    const row = Math.floor(Math.random() * GRID_SIZE);
+                    const col = Math.floor(Math.random() * GRID_SIZE);
+
+                    if (canPlaceShip(newGrid, row, col, ship.size, orientation)) {
+                        for (let i = 0; i < ship.size; i++) {
+                            const r = row + (orientation === "vertical" ? i : 0);
+                            const c = col + (orientation === "horizontal" ? i : 0);
+                            newGrid[r][c].hasShip = true;
+                        }
+                        placed = true;
+                    }
+                }
+            }
+        }
+        return newGrid;
+    }
+
+    // Funzione per controllare se tutte le navi sono colpite
+    function checkWin(grid) {
+        return grid
+            .flat()
+            .filter(cell => cell.hasShip)
+            .every(cell => cell.hit);
+    }
+
+    const handleDropShip = (row, col) => {
+        if (!isPlacing || draggedShipSize == null) return;
+
+        const size = draggedShipSize;
+        const newGrid = playerGrid.map((r) =>
+            r.map((cell) => ({ ...cell }))
+        );
+
+        if (canPlaceShip(newGrid, row, col, size, orientation)) {
+            for (let i = 0; i < size; i++) {
+                const r = row + (orientation === "vertical" ? i : 0);
+                const c = col + (orientation === "horizontal" ? i : 0);
+                newGrid[r][c].hasShip = true;
+            }
+            setPlayerGrid(newGrid);
+            setDraggedShipSize(null);
+
+            // Aggiorna le navi disponibili
+            const updatedShips = availableShips.map(ship =>
+                ship.size === size && ship.count > 0
+                    ? { ...ship, count: ship.count - 1 }
+                    : ship
+            );
+            setAvailableShips(updatedShips);
+
+            // Controlla se tutte le navi sono state piazzate
+            const allPlaced = updatedShips.every(ship => ship.count === 0);
+            if (allPlaced) {
+                setIsPlacing(false);
+                setBotGrid(placeShipsRandomly());
+                setPlayerTurn(true);
+                setMessage("Hai posizionato tutte le navi. La partita inizia!");
+            }
+        } else {
+            setMessage("Posizione non valida!");
+        }
+    };
+
+    const handleCellClick = (row, col) => {
+        if (!playerTurn || botGrid[row][col].hit) return;
+
+        const newBotGrid = botGrid.map((r) =>
+            r.map((cell) => ({ ...cell }))
+        );
+        newBotGrid[row][col].hit = true;
+        setBotGrid(newBotGrid);
+
+        if (checkWin(newBotGrid)) {
+            setMessage("🎉 Congratulazioni! Hai vinto!");
+            setPlayerTurn(false); // blocca partita
+            return;
+        }
+
+        setPlayerTurn(false);
+        botMove();
+    };
+
+    const botMove = () => {
+        setTimeout(() => {
+            let row, col;
+            let validMove = false;
+            const newPlayerGrid = playerGrid.map((r) =>
+                r.map((cell) => ({ ...cell }))
+            );
+
+            while (!validMove) {
+                row = Math.floor(Math.random() * GRID_SIZE);
+                col = Math.floor(Math.random() * GRID_SIZE);
+                if (!newPlayerGrid[row][col].hit) {
+                    validMove = true;
+                }
+            }
+
+            newPlayerGrid[row][col].hit = true;
+            setPlayerGrid(newPlayerGrid);
+
+            if (checkWin(newPlayerGrid)) {
+                setMessage("💀 Hai perso! Il bot ha affondato tutte le tue navi!");
+                setPlayerTurn(false); // blocca partita
+                return;
+            }
+
+            setPlayerTurn(true);
+        }, 500);
+    };
+
+    const renderCell = (cell, onClick, showShips, row, col) => {
+        let bg = "bg-blue-200";
+        if (cell.hit) {
+            bg = cell.hasShip ? "bg-red-600" : "bg-gray-500";
+        } else if (showShips && cell.hasShip) {
+            bg = "bg-gray-400";
+        }
+
+        return (
+            <div
+                className={`w-8 h-8 border border-black flex items-center justify-center ${bg}`}
+                onClick={onClick}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    if (showShips && isPlacing) handleDropShip(row, col);
+                }}
+            />
+        );
+    };
+
+    const renderGridWithLabels = (grid, onClick, showShips) => {
+        return (
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(11, 2rem)",
+                    gridTemplateRows: "repeat(11, 2rem)",
+                }}
+            >
+                <div />
+                {LETTERS.map((letter) => (
+                    <div
+                        key={`col-${letter}`}
+                        className="flex items-center justify-center font-bold"
+                    >
+                        {letter}
                     </div>
-                </div>
+                ))}
+
+                {grid.map((row, rowIndex) => (
+                    <React.Fragment key={`row-${rowIndex}`}>
+                        <div className="flex items-center justify-center font-bold">
+                            {rowIndex + 1}
+                        </div>
+                        {row.map((cell, colIndex) => (
+                            <div key={`cell-${rowIndex}-${colIndex}`}>
+                                {renderCell(
+                                    cell,
+                                    () => onClick(rowIndex, colIndex),
+                                    showShips,
+                                    rowIndex,
+                                    colIndex
+                                )}
+                            </div>
+                        ))}
+                    </React.Fragment>
+                ))}
+            </div>
+        );
+    };
+
+    return (
+        <div className="p-4">
+            <button id="exit-btn" onClick={apriPopup} className="mb-4 px-3 py-1 bg-red-600 text-white rounded">Esci</button>
+            <div id="overlay" onClick={chiudiPopup} style={{ display: "none" }}></div>
+            <div id="confirm-popup" style={{ display: "none" }}>
+                <p>Sei sicuro di voler uscire dalla partita?</p>
+                <button onClick={confermaUscita} className="mr-2 px-3 py-1 bg-green-600 text-white rounded">Sì</button>
+                <button onClick={chiudiPopup} className="px-3 py-1 bg-gray-400 rounded">No</button>
             </div>
 
-            <h1>Modalità Singleplayer</h1>
+            <h1 className="text-xl font-bold mb-4">Battaglia Navale vs Bot</h1>
 
-            <div className="game-container">
-                <div className="bot-hand">
-                    {bot.map((_, i) => (
-                        <img key={i} src="/assets/cards/cartaCoperta.png" alt="bot-card" className="card-img" />
-                    ))}
-                </div>
+            {/* Posizionamento sopra le griglie */}
+            {isPlacing && (
+                <div className="mb-4">
+                    <p className="mb-2">⏳ Tempo per il posizionamento: {placementTimeLeft} secondi</p>
+                    <button
+                        onClick={() =>
+                            setOrientation((prev) =>
+                                prev === "horizontal" ? "vertical" : "horizontal"
+                            )
+                        }
+                        className="px-4 py-2 bg-blue-500 text-white rounded mb-2"
+                    >
+                        Orientamento: {orientation === "horizontal" ? "Orizzontale" : "Verticale"}
+                    </button>
 
-                <div className="table-area">
-                    <div className="center-pile">
-                        <h2>Scarti</h2>
-                        <img
-                            src={scarti.length ? scarti[scarti.length - 1].img : ''}
-                            alt="carta scarto"
-                            className="card-img"
-                        />
-                    </div>
-
-                    <div id="draw-pile">
-                        <button onClick={pescaDalMazzo} disabled={!turnoGiocatore || fineGioco}>
-                            <img src="/assets/cards/cartaCoperta.png" alt="mazzo" className="card-img" />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="player-hand">
-                    <h2>Le tue carte</h2>
-                    <div className="hand-cards">
-                        {giocatore.map((carta, i) => (
-                            <img
-                                key={carta.id}
-                                src={carta.img}
-                                alt={`${carta.numero} ${carta.colore}`}
-                                onClick={() => turnoGiocatore && giocaCarta(carta, i)}
-                                className="card-img"
-                            />
+                    <div className="flex gap-2 flex-wrap">
+                        {availableShips.flatMap(ship =>
+                            Array.from({ length: ship.count }).map((_, i) => ({
+                                size: ship.size,
+                                id: `${ship.size}-${i}-${Math.random()}`
+                            }))
+                        ).map((shipObj) => (
+                            <div
+                                key={shipObj.id}
+                                draggable
+                                onDragStart={() => setDraggedShipSize(shipObj.size)}
+                                className="bg-gray-400 text-white flex items-center justify-center rounded cursor-move"
+                                style={{
+                                    width: orientation === "horizontal" ? `${shipObj.size * 2}rem` : "2rem",
+                                    height: orientation === "vertical" ? `${shipObj.size * 2}rem` : "2rem",
+                                }}
+                            >
+                                {shipObj.size}
+                            </div>
                         ))}
                     </div>
                 </div>
+            )}
 
-                <button id="action-button" onClick={handleDueClick} disabled={!turnoGiocatore || fineGioco}>
-                    DUE!
-                </button>
-
-                {showDuePopup && (
-                    <div className="due-popup">
-                        <h1>DUE!!!</h1>
-                    </div>
-                )}
-
-                {fineGioco && (
-                    <div className="endgame-popup">
-                        <h1>{vincitore === "Giocatore" ? "Hai vinto!" : "Il bot ha vinto!"}</h1>
-
-                        <button onClick={() => navigate('/menu-page')}>Torna  al menu</button>
-                    </div>
-                )}
-
-                {mostraPopupConferma && (
-                    <div className="confirm-exit-popup">
-                        <h2>Vuoi tornare al menu?</h2>
-                        <div className="popup-buttons">
-                            <button onClick={() => navigate('/menu-page')}>Sì</button>
-                            <button onClick={() => setMostraPopupConferma(false)}>No</button>
-                        </div>
-                    </div>
-                )}
-
-
+            {/* Griglie affiancate */}
+            <div className="flex gap-8">
+                <div>
+                    <h2 className="font-bold mb-2">Tua griglia</h2>
+                    {renderGridWithLabels(playerGrid, isPlacing ? handleDropShip : () => {}, true)}
+                </div>
+                <div>
+                    <h2 className="font-bold mb-2">Griglia nemica</h2>
+                    {renderGridWithLabels(botGrid, handleCellClick, false)}
+                </div>
             </div>
+
+            {/* Messaggio sotto le griglie */}
+            {message && <p className="mt-4 font-bold">{message}</p>}
         </div>
     );
-}
+};
 
-export default Singleplayer;
+export default BattleshipGame;
