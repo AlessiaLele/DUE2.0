@@ -6,7 +6,7 @@ const express  = require('express');
 
 const http     = require('http');
 
-const { Server } = require('socket.io');
+//const { Server } = require('socket.io');
 
 const mongoose = require('mongoose');
 
@@ -16,24 +16,24 @@ const cors     = require('cors');
 
 const authRoutes  = require('./routes/auth');
 
-const lobbyRoutes = require('./routes/lobby');
+//const lobbyRoutes = require('./routes/lobby');
 
 const app    = express();
 
 const server = http.createServer(app);
 
-const io     = new Server(server, {
+/*const io     = new Server(server, {
 
     cors: { origin: '*' }
 
-});
+});*/
 
 // Middlewares
 
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
-app.use('/api/lobby', lobbyRoutes);
+//app.use('/api/lobby', lobbyRoutes);
 
 // Connect to MongoDB
 
@@ -63,7 +63,7 @@ app.use('/api/lobby', lobbyRoutes);
 
 // In-memory state
 
-const lobbies = {};
+/*const lobbies = {};
 
 io.on('connection', (socket) => {
 
@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
 
         console.log('Client disconnesso:', socket.id);
     });
-});
+});*/
 
 // Start server
 

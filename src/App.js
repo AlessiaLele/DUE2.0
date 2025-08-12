@@ -22,8 +22,8 @@ function App() {
                 <Route path="/singleplayer" element={<Singleplayer />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/instructions" element={<Instructions />} />
-                <Route path="/multiplayer" element={<Lobby />} />
-                <Route path="/game-lobby/:lobbyName" element={<GameLobby />} />
+                <Route path="/lobby" element={<Lobby />} />
+                <Route path="/game-lobby/:roomId" element={<GameLobby />} />
             </Routes>
         </Router>
     );

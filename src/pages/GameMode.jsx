@@ -10,7 +10,7 @@ const GameMode = () => {
     };
 
     const playMultiplayer = () => {
-        navigate("/multiplayer");
+        navigate("/lobby");
     };
 
     return (
