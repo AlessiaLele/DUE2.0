@@ -10,6 +10,7 @@ import Settings from "./pages/Settings"
 import Instructions from "./pages/Instructions";
 import Lobby from "./pages/Lobby";
 import GameLobby from './pages/GameLobby';
+import Room from "./pages/Room";
 
 function App() {
     return (
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/instructions" element={<Instructions />} />
                 <Route path="/lobby" element={<Lobby />} />
+                <Route path="/room/:roomId" element={<Room />} />
                 <Route path="/game-lobby/:roomId" element={<GameLobby />} />
             </Routes>
         </Router>

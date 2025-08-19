@@ -15,7 +15,7 @@ const GameLobby = () => {
             return;
         }
 
-        const s = io("http://localhost:4000", {
+        const s = io("http://localhost:3001", {
             auth: { token }
         });
         setSocket(s);
