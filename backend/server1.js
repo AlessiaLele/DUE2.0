@@ -1,113 +1,118 @@
 require('dotenv').config();
 
-const express = require('express');
 const http = require('http');
+
+const express = require('express');
+
 const cors = require('cors');
+
 const { Server } = require('socket.io');
-const verifyToken = require('./utils/verifyToken');
+
+const jwt = require('jsonwebtoken');
+
+const fetch = require('node-fetch'); // per contattare il server auth
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
 const server = http.createServer(app);
+
+app.use(cors());
+
+app.use(express.json());
+
 const io = new Server(server, {
+
     cors: {
-        origin: "*", // In produzione mettere il dominio corretto
+
+        origin: "*", // in produzione limita al tuo dominio
+
         methods: ["GET", "POST"]
+
     }
+
 });
 
-// Lista giocatori e stanze
-let lobbyPlayers = [];
-let gameRooms = {}; // { roomId: { players: [], boardStates: {} } }
+// URL del tuo server Auth
 
-io.use((socket, next) => {
+const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000/api/auth";
+
+// Middleware di autenticazione via JWT
+
+io.use(async (socket, next) => {
+
     const token = socket.handshake.auth?.token;
-    if (!token) {
-        return next(new Error("Token mancante"));
-    }
-    const decoded = verifyToken(token);
-    if (!decoded) {
+
+    if (!token) return next(new Error("Token mancante"));
+
+    try {
+
+        // Verifica del token localmente (più veloce)
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        socket.user = decoded;
+
+        return next();
+
+    } catch (err) {
+
         return next(new Error("Token non valido"));
+
     }
-    socket.userId = decoded.id;
-    next();
+
 });
 
-io.use((socket, next) => {
-    const token = socket.handshake.auth?.token;
-    console.log("🔑 Token ricevuto:", token);
-    if (!token) {
-        console.warn("⚠️ Nessun token inviato");
-        return next(new Error("Token mancante"));
-    }
-    const decoded = verifyToken(token);
-    if (!decoded) {
-        console.warn("⚠️ Token non valido");
-        return next(new Error("Token non valido"));
-    }
-    socket.userId = decoded.id;
-    next();
-});
+// Gestione delle connessioni
 
-io.on('connection', (socket) => {
-    console.log(`🔗 Utente connesso: ${socket.userId}`);
+io.on("connection", (socket) => {
 
-    // Aggiunge giocatore alla lobby
-    lobbyPlayers.push({ userId: socket.userId, socketId: socket.id });
-    io.emit('lobbyUpdate', lobbyPlayers.map(p => p.userId));
+    console.log("Utente connesso:", socket.user.id);
 
-    // Creazione stanza
-    socket.on('createRoom', () => {
-        const roomId = `room_${Date.now()}`;
-        gameRooms[roomId] = { players: [socket.userId], boardStates: {} };
+    // Un utente entra in una stanza
+
+    socket.on("joinRoom", (roomId) => {
+
         socket.join(roomId);
 
-        // Invia sia path che link completo
-        const invitePath = `/game-lobby/${roomId}`;
-        const inviteLink = `http://localhost:3000${invitePath}`;
+        console.log(`Utente ${socket.user.id} entrato nella stanza ${roomId}`);
 
-        socket.emit('roomCreated', { roomId, inviteLink, invitePath });
-        io.emit('lobbyUpdate', lobbyPlayers.map(p => p.userId));
+        // Notifica agli altri utenti
+
+        socket.to(roomId).emit("message", `Un nuovo utente si è unito alla stanza ${roomId}`);
+
     });
 
+    // Messaggi nella stanza
 
+    socket.on("chatMessage", ({ roomId, message }) => {
 
-    // Unirsi a stanza
-    socket.on('joinRoom', (roomId) => {
-        const room = gameRooms[roomId];
-        if (room && room.players.length < 2) {
-            room.players.push(socket.userId);
-            socket.join(roomId);
-            io.to(roomId).emit('gameStart', { players: room.players });
-        } else {
-            socket.emit('error', 'Stanza piena o inesistente');
-        }
-    });
+        io.to(roomId).emit("chatMessage", {
 
-    // Gestione mosse di gioco
-    socket.on('makeMove', ({ roomId, move }) => {
-        if (gameRooms[roomId]) {
-            socket.to(roomId).emit('opponentMove', move);
-        }
+            user: socket.user.id,
+
+            message
+
+        });
+
     });
 
     // Disconnessione
-    socket.on('disconnect', () => {
-        console.log(`❌ Utente disconnesso: ${socket.userId}`);
-        lobbyPlayers = lobbyPlayers.filter(p => p.socketId !== socket.id);
 
-        for (const [roomId, room] of Object.entries(gameRooms)) {
-            room.players = room.players.filter(p => p !== socket.userId);
-            if (room.players.length === 0) delete gameRooms[roomId];
-        }
+    socket.on("disconnect", () => {
 
-        io.emit('lobbyUpdate', lobbyPlayers.map(p => p.userId));
+        console.log(`Utente ${socket.user.id} disconnesso`);
+
     });
+
 });
 
-const PORT = process.env.LOBBY_PORT || 3000;
+// Avvio server
+
+const PORT = process.env.GAME_PORT || 5000;
+
 server.listen(PORT, () => {
-    console.log(`🎮 Server lobby avviato sulla porta ${PORT}`);
+
+    console.log(`Game server avviato sulla porta ${PORT}`);
+
 });
+

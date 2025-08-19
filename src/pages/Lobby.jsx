@@ -1,81 +1,47 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
+
+import { v4 as uuidv4 } from "uuid"; // per generare ID casuali
 
 export default function Lobby() {
+
+    const [roomName, setRoomName] = useState("");
+
     const navigate = useNavigate();
-    const [socket, setSocket] = useState(null);
-    const [players, setPlayers] = useState([]);
-    const [inviteLink, setInviteLink] = useState(null);
-    const token = localStorage.getItem("token");
-
-    useEffect(() => {
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
-        const s = io("http://localhost:4000", { auth: { token } });
-        setSocket(s);
-
-        s.on("lobbyUpdate", (list) => setPlayers(list));
-
-        s.on("roomCreated", ({ roomId, inviteLink, invitePath }) => {
-            setInviteLink(inviteLink);
-            setInvitePath(invitePath); // salvo anche il path interno
-        });
-
-
-        s.on("gameStart", ({ players }) => {
-            console.log("Partita iniziata", players);
-        });
-
-        s.on("error", (msg) => alert(msg));
-
-        return () => {
-            s.disconnect();
-        };
-    }, [token, navigate]);
 
     const createRoom = () => {
-        if (!socket) return;
-        socket.emit("createRoom");
-    };
 
-    const joinRoom = () => {
-        const id = prompt("Inserisci l'ID stanza:");
-        if (id) socket.emit("joinRoom", id);
-    };
+        // se l’utente non inserisce nome, genera un ID casuale
 
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText(inviteLink);
-        alert("Link copiato negli appunti!");
+        const id = roomName.trim() !== "" ? roomName.trim() : uuidv4();
+
+        // vai alla stanza
+
+        navigate(`/room/${id}`);
+
     };
 
     return (
-        <div style={{ padding: 20 }}>
-            <h2>Lobby Multiplayer</h2>
-            <button onClick={createRoom}>Crea Stanza</button>
-            <button onClick={joinRoom}>Unisciti a Stanza</button>
+        <div style={{ padding: "20px" }}>
+            <h2>Lobby</h2>
+            <p>Puoi creare una stanza privata per giocare con un amico.</p>
 
-            {inviteLink && (
-                <div style={{ marginTop: 20 }}>
-                    <p>Invita un amico con questo link:</p>
-                    <input type="text" value={inviteLink} readOnly style={{ width: "100%" }} />
-                    <button onClick={copyToClipboard}>📋 Copia link</button>
-                    <button onClick={() => navigate(invitePath)}>
-                        Entra nella stanza
-                    </button>
-                </div>
-            )}
+            <input
 
+                type="text"
 
-            <h3>Giocatori connessi:</h3>
-            <ul>
-                {players.map((p, i) => (
-                    <li key={i}>{p}</li>
-                ))}
-            </ul>
+                value={roomName}
+
+                onChange={(e) => setRoomName(e.target.value)}
+
+                placeholder="Nome stanza (opzionale)"
+
+            />
+            <button onClick={createRoom}>Crea stanza privata</button>
         </div>
+
     );
+
 }
+

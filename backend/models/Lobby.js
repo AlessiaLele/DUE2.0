@@ -1,9 +1,16 @@
-const mongoose = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-const lobbySchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
-    players: [{ type: String }],
-    createdAt: { type: Date, default: Date.now }
-});
+const lobbySchema = new Schema({
 
-module.exports = mongoose.model('Lobby', lobbySchema);
+    code:   { type: String, unique: true, index: true },
+
+    host:   { type: String, required: true },
+
+    players:{ type: [String], default: [] },
+
+    status: { type: String, enum: ['waiting', 'ready', 'running', 'ended'], default: 'waiting' }
+
+}, { timestamps: true });
+
+module.exports = model('Lobby', lobbySchema);
+
