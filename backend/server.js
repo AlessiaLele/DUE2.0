@@ -7,6 +7,7 @@ const express  = require('express');
 const http     = require('http');
 
 
+
 const mongoose = require('mongoose');
 
 const cors     = require('cors');
@@ -15,24 +16,19 @@ const cors     = require('cors');
 
 const authRoutes  = require('./routes/auth');
 
-//const lobbyRoutes = require('./routes/lobby');
+
 
 const app    = express();
 
 const server = http.createServer(app);
 
-/*const io     = new Server(server, {
 
-    cors: { origin: '*' }
-
-});*/
 
 // Middlewares
 
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
-//app.use('/api/lobby', lobbyRoutes);
 
 // Connect to MongoDB
 
@@ -62,105 +58,6 @@ app.use('/api/auth', authRoutes);
 
 // In-memory state
 
-/*const lobbies = {};
-
-io.on('connection', (socket) => {
-
-    console.log('Client connesso:', socket.id);
-
-    socket.on('create-lobby', async ({ name, username }) => {
-        console.log(`🛠 create-lobby ricevuto da ${socket.id}:`, name, username);
-        const Lobby = require('./models/Lobby');
-
-        try {
-
-            let lobby = await Lobby.findOne({ name });
-
-            if (lobby) return socket.emit('error', { msg: 'Lobby già esistente' });
-
-            // Save to DB
-
-            lobby = new Lobby({ name, players: [username] });
-
-            await lobby.save();
-
-            // In-memory
-
-            lobbies[name] = new Set([username]);
-
-            socket.data.username  = username;
-            socket.data.lobbyName = name;
-
-            socket.join(name);
-
-            // Emit initial update
-
-            const playersArray = Array.from(lobbies[name]);
-
-            io.to(name).emit('lobby-update', { players: playersArray });
-
-        } catch (err) {
-
-            console.error(err);
-
-            socket.emit('error', { msg: 'Errore creazione lobby' });
-
-        }
-
-    });
-
-    socket.on('join-lobby', async ({ name, username }) => {
-        console.log(`🚪 join-lobby ricevuto da ${socket.id}:`, name, username);
-        const Lobby = require('./models/Lobby');
-
-        try {
-
-            const lobby = await Lobby.findOne({ name });
-
-            if (!lobby) return socket.emit('error', { msg: 'Lobby non trovata' });
-
-            if (!lobbies[name]) lobbies[name] = new Set();
-
-            if (lobbies[name].size >= 4) {
-                return socket.emit('lobby-full', { msg: 'La lobby è piena' });
-            }
-            // Update DB
-
-            if (!lobby.players.includes(username)) {
-
-                lobby.players.push(username);
-
-                await lobby.save();
-
-            }
-            socket.data.username  = username;
-            socket.data.lobbyName = name;
-
-            lobbies[name].add(username);
-
-            socket.join(name);
-
-            // Emit updated list
-
-            const playersArray = Array.from(lobbies[name]);
-
-            io.to(name).emit('lobby-update', { players: playersArray });
-
-        } catch (err) {
-
-            console.error(err);
-
-            socket.emit('error', { msg: 'Errore join lobby' });
-
-        }
-
-    });
-
-    socket.on('disconnect', () => {
-
-        console.log('Client disconnesso:', socket.id);
-    });
-});*/
 
 // Start server
 
