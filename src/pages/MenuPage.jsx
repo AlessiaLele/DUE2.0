@@ -9,9 +9,7 @@ const MenuPage = () => {
         navigate("/game-mode");
     };
 
-    const goToSettings = () => {
-        navigate("/settings");
-    };
+
 
     const showInstructions = () => {
         navigate("/Instructions");
@@ -25,9 +23,9 @@ const MenuPage = () => {
     return (
 
         <div className="menu-container">
-            <h1>DUE</h1>
+            <h1>Nome gioco</h1>
             <button className="menu-button" onClick={startGame}>▶️ Gioca</button>
-            <button className="menu-button secondary" onClick={goToSettings}>⚙️ Impostazioni</button>
+
             <button className="menu-button secondary" onClick={showInstructions}>❓ Istruzioni</button>
             <button className="menu-button danger" onClick={exitGame}>↩️ Log Out</button>
         </div>

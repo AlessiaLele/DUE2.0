@@ -13,10 +13,26 @@ const INITIAL_SHIPS = [
     { size: 2, count: 1 },
 ];
 
+// 👇 Tema informatico: icone per sistema
+const SYSTEM_EMOJI = {
+    'Data Center': '🖥️',
+    'Firewall': '🔥',
+    'Server Web': '🌐',
+    'Database': '🗄️',
+    'Router': '📡',
+};
+
+// 👇 Code dei sistemi per misura (usate per decidere il “tipo” al piazzamento)
+const initialSystemQueues = {
+    5: ['Data Center'],
+    4: ['Firewall'],
+    3: ['Server Web', 'Database'], // due sistemi da 3: prima Server Web, poi Database
+    2: ['Router'],
+};
+
 function createEmptyGrid() {
     return Array.from({ length: GRID_SIZE }, () =>
-        Array.from({ length: GRID_SIZE }, () => ({ hasShip: false, status: null }))
-
+        Array.from({ length: GRID_SIZE }, () => ({ hasShip: false, status: null, systemType: null }))
     );
 }
 
@@ -28,13 +44,11 @@ export default function Room() {
     const [gameStarted, setGameStarted] = useState(false);
     const [waitingTwo, setWaitingTwo] = useState(true);
 
-    // Griglie come nel bot
+    // Griglie
     const [myGrid, setMyGrid] = useState(createEmptyGrid());
     const [enemyGrid, setEnemyGrid] = useState(createEmptyGrid());
 
-
-
-    // Stato piazzamento identico al bot
+    // Stato piazzamento
     const [isPlacing, setIsPlacing] = useState(true);
     const [orientation, setOrientation] = useState('horizontal');
 
@@ -48,8 +62,11 @@ export default function Room() {
     const [myTurn, setMyTurn] = useState(false);
 
     // Flotta piazzata come array di navi (ogni nave = array di celle {r,c})
-    const placedShipsRef = useRef([]); // mantieni anche in ref per accesso facile
+    const placedShipsRef = useRef([]);
     const overlayRef = useRef(null);
+
+    // 👇 Coda per assegnare il tipo/emoji ad ogni sistema piazzato
+    const [systemQueues, setSystemQueues] = useState(initialSystemQueues);
 
     const formatCoordinate = (row, col) => `${LETTERS[col]}${row + 1}`;
 
@@ -75,7 +92,7 @@ export default function Room() {
         // Start effettivo quando entrambi hanno mandato ready
         s.on("gameStart", ({ firstTurnSocketId }) => {
             setGameStarted(true);
-            setMessage("🎮 Il gioco è iniziato!");
+            setMessage("🛡️ La cyber-battaglia è iniziata!");
             setMyTurn(s.id === firstTurnSocketId);
         });
 
@@ -91,7 +108,9 @@ export default function Room() {
                 g[y][x].status = hit ? "hit" : "miss";
                 return g;
             });
-            setMessage(hit ? `💥 Sei stato colpito in ${coord}!` : `💦 Colpo avversario mancato in ${coord}.`);
+            setMessage(hit
+                ? `⚠️ Attacco avversario in ${coord}: sistema compromesso!`
+                : `🛡️ Tentativo avversario bloccato in ${coord}.`);
         });
 
         // Attaccante: feedback sul campo nemico (per marcare dove ho tirato)
@@ -103,26 +122,39 @@ export default function Room() {
                 return g;
             });
             if (hit) {
-                setMessage( sunk
-                    ? `🎯 Colpito e affondato (${coord}, nave da ${sunkSize})!`
-                    : `💥 Colpito in ${coord}!`);
+                setMessage(
+                    sunk
+                        ? `🎯 Compromesso e disattivato (${coord}, sistema da ${sunkSize})!`
+                        : `💥 Sistema avversario compromesso in ${coord}!`
+                );
             } else {
-                setMessage(`💦 Mancato in ${coord}.`);
+                setMessage(`🛡️ Tentativo bloccato in ${coord}.`);
             }
         });
 
         s.on("gameOver", ({ winner, forfeit }) => {
             setMyTurn(false);
-            setMessage(forfeit ? `🏁 Partita finita per ritiro. Vincitore: ${winner}` : `🏁 Partita finita. Vincitore: ${winner}`);
+            setMessage(
+                forfeit
+                    ? `🏁 Attacco concluso per ritiro. Vincitore: ${winner}`
+                    : `🏁 Attacco concluso. Vincitore: ${winner}`
+            );
         });
 
         s.on("errorMessage", (msg) => setMessage(msg));
+
+        s.on("moveIgnored", ({ x, y }) => {
+            const coord = formatCoordinate(y, x);
+            setMessage(`⚠️ Hai già provato ${coord}. Mossa ignorata, puoi riprovare.`);
+            // Ripristino il turno: il client si era già tolto il turno quando ha emesso l'attack
+            setMyTurn(true);
+        });
 
         setSocket(s);
         return () => s.disconnect();
     }, [roomId, navigate]);
 
-    // ————— Timer piazzamento come nel bot —————
+    // ————— Timer piazzamento —————
     useEffect(() => {
         if (!isPlacing || !timerActive) return;
         if (placementTimeLeft > 0) {
@@ -134,7 +166,7 @@ export default function Room() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isPlacing, timerActive, placementTimeLeft]);
 
-    // Piazzamento identico al bot, ma tracciamo anche le navi per inviarle al server
+    // Piazzamento con controllo
     function canPlaceShip(grid, row, col, size, ori) {
         for (let i = 0; i < size; i++) {
             const r = row + (ori === 'vertical' ? i : 0);
@@ -145,9 +177,13 @@ export default function Room() {
         return true;
     }
 
+    // Autoposizionamento completo con assegnazione dei tipi (ignora il parziale, come l’originale)
     function placeShipsRandomlyWithGroups() {
         const grid = createEmptyGrid();
         const groups = [];
+        // copia mutabile delle code per dimensione
+        const qBySize = JSON.parse(JSON.stringify(initialSystemQueues));
+
         for (const ship of INITIAL_SHIPS) {
             for (let n = 0; n < ship.count; n++) {
                 let placed = false;
@@ -156,11 +192,20 @@ export default function Room() {
                     const row = Math.floor(Math.random() * GRID_SIZE);
                     const col = Math.floor(Math.random() * GRID_SIZE);
                     if (canPlaceShip(grid, row, col, ship.size, ori)) {
+                        // prendi il tipo dalla coda relativa alla dimensione
+                        const q = qBySize[ship.size] || [];
+                        const systemType = q.length ? q.shift() :
+                            (ship.size === 5 ? 'Data Center'
+                                : ship.size === 4 ? 'Firewall'
+                                    : ship.size === 3 ? 'Server Web'
+                                        : 'Router');
+
                         const cells = [];
                         for (let i = 0; i < ship.size; i++) {
                             const r = row + (ori === 'vertical' ? i : 0);
                             const c = col + (ori === 'horizontal' ? i : 0);
                             grid[r][c].hasShip = true;
+                            grid[r][c].systemType = systemType; // 👈 salva il tipo per l’icona
                             cells.push({ r, c });
                         }
                         groups.push(cells);
@@ -176,11 +221,21 @@ export default function Room() {
         if (!isPlacing || !size) return;
         const newGrid = myGrid.map(r => r.map(c => ({ ...c })));
         if (canPlaceShip(newGrid, startRow, startCol, size, orientation)) {
+            // tipo (e icona) per la nave che stai piazzando ORA
+            const typeQueue = systemQueues[size] || [];
+            const systemType = typeQueue.length
+                ? typeQueue[0]
+                : (size === 5 ? 'Data Center'
+                    : size === 4 ? 'Firewall'
+                        : size === 3 ? 'Server Web'
+                            : 'Router');
+
             const cells = [];
             for (let i = 0; i < size; i++) {
                 const r = startRow + (orientation === 'vertical' ? i : 0);
                 const c = startCol + (orientation === 'horizontal' ? i : 0);
                 newGrid[r][c].hasShip = true;
+                newGrid[r][c].systemType = systemType; // 👈 assegna tipo per mostrare l’icona
                 cells.push({ r, c });
             }
             setMyGrid(newGrid);
@@ -194,6 +249,12 @@ export default function Room() {
             );
             setAvailableShips(updated);
 
+            // scala la coda del tipo usato
+            setSystemQueues(prev => ({
+                ...prev,
+                [size]: (prev[size] && prev[size].length) ? prev[size].slice(1) : [],
+            }));
+
             const allPlaced = updated.every(s => s.count === 0);
             if (allPlaced) finishPlacementAndReady();
         } else {
@@ -202,9 +263,7 @@ export default function Room() {
     }
 
     function autoCompleteAndReady() {
-        // completa: mantiene quanto già piazzato, piazza il resto random
-        // per semplicità (e robustezza) rigeneriamo una flotta completa random,
-        // ignorando il parziale — stessa scelta del tuo bot in caso di tempo scaduto.
+        // completa: rigenera una flotta completa random (ignora il parziale), come l’originale
         const { grid, groups } = placeShipsRandomlyWithGroups();
         setMyGrid(grid);
         placedShipsRef.current = groups;
@@ -213,7 +272,7 @@ export default function Room() {
 
     function finishPlacementAndReady(auto = false) {
         setIsPlacing(false);
-        if (auto) setMessage('Tempo scaduto! Navi piazzate automaticamente. In attesa dell’avvio…');
+        if (auto) setMessage('⏱️ Tempo scaduto! I sistemi sono stati piazzati automaticamente. In attesa dell’avvio…');
 
         // invia flotta e ready
         socket?.emit("placeFleet", { roomId, ships: placedShipsRef.current });
@@ -225,13 +284,13 @@ export default function Room() {
         if (!gameStarted || !myTurn || isPlacing) return;
 
         const cell = enemyGrid[row][col];
-        if (cell.hit) return; // già provato
+        if (cell.hit) return; // (lasciato come nell’originale)
 
         socket?.emit("attack", { roomId, x: col, y: row });
         setMyTurn(false); // attendo esito/turnChanged dal server
     }
 
-    // ————— Drag & Drop helpers (identici al bot) —————
+    // ————— Drag & Drop helpers —————
     const canPlacePreviewCell = (key) => {
         const [r, c] = key.split('-').map(Number);
         return r >= 0 && c >= 0 && r < GRID_SIZE && c < GRID_SIZE;
@@ -245,10 +304,17 @@ export default function Room() {
         } else if (cell.status === "miss") {
             bg = 'bg-gray-600';  // mancato (grigio scuro)
         } else if (showShips && cell.hasShip) {
-            bg = 'bg-gray-400';  // nave visibile solo sulla propria griglia
+            bg = 'bg-gray-400';  // sistema visibile solo sulla propria griglia
         }
         if (previewCells.includes(key)) {
             bg = canPlacePreviewCell(key) ? 'bg-yellow-300' : 'bg-red-300';
+        }
+
+        // 👇 icona del sistema (solo sulla tua griglia e se non è stato ancora colpito/mancato)
+        let content = null;
+        if (showShips && cell.hasShip && !cell.status) {
+            const emoji = SYSTEM_EMOJI[cell.systemType] || '💻';
+            content = <span style={{ fontSize: '1rem', lineHeight: 1 }}>{emoji}</span>;
         }
 
         return (
@@ -273,7 +339,9 @@ export default function Room() {
                     }
                 }}
                 onDragLeave={() => setPreviewCells((prev) => prev.filter((p) => p !== key))}
-            />
+            >
+                {content}
+            </div>
         );
     };
 
@@ -322,7 +390,7 @@ export default function Room() {
         );
     };
 
-    // ————— UI extra (stessi popup dell’originale) —————
+    // ————— UI extra (popup) —————
     const apriPopup = () => {
         const popup = document.getElementById('confirm-popup');
         const overlay = document.getElementById('overlay');
@@ -348,14 +416,14 @@ export default function Room() {
                 <button onClick={chiudiPopup} className="px-3 py-1 bg-gray-400 rounded">No</button>
             </div>
 
-            <h2 className="text-xl font-bold mb-2">Stanza privata: {roomId}</h2>
+            <h2 className="text-xl font-bold mb-2">Cyber-battaglia privata: {roomId}</h2>
 
             {!gameStarted && (
                 <>
                     {waitingTwo ? (
                         <p>⏳ In attesa di un altro giocatore...</p>
                     ) : (
-                        <p>👥 Siete in due. Completa il piazzamento per iniziare.</p>
+                        <p>👥 Siete in due. Completa il posizionamento dei sistemi per iniziare.</p>
                     )}
                 </>
             )}
@@ -372,7 +440,17 @@ export default function Room() {
 
                     <div className="flex gap-2 flex-wrap">
                         {availableShips
-                            .flatMap((ship) => Array.from({ length: ship.count }).map((_, i) => ({ size: ship.size, key: `${ship.size}-${i}` })))
+                            .flatMap((ship) =>
+                                Array.from({ length: ship.count }).map((_, i) => {
+                                    // Nome del sistema in base alla dimensione e all’indice (per distinguere i due da 3)
+                                    let systemName = '';
+                                    if (ship.size === 5) systemName = 'Data Center';
+                                    else if (ship.size === 4) systemName = 'Firewall';
+                                    else if (ship.size === 3) systemName = i === 0 ? 'Server Web' : 'Database';
+                                    else if (ship.size === 2) systemName = 'Router';
+                                    return { size: ship.size, key: `${ship.size}-${i}`, name: systemName };
+                                })
+                            )
                             .map((shipObj) => (
                                 <div
                                     key={shipObj.key}
@@ -389,16 +467,26 @@ export default function Room() {
                                             const unitHeight = rect.height / shipObj.size;
                                             offset = Math.floor(relY / unitHeight);
                                         }
+                                        // clamp
                                         offset = Math.max(0, Math.min(offset, shipObj.size - 1));
                                         e.dataTransfer.setData('application/json', JSON.stringify({ size: shipObj.size, offset }));
                                     }}
-                                    className="bg-gray-400 text-white flex items-center justify-center rounded cursor-move"
+                                    className="bg-gray-400 text-white flex items-center justify-center rounded cursor-move text-sm font-semibold"
                                     style={{
                                         width: orientation === 'horizontal' ? `${shipObj.size * 2}rem` : '2rem',
                                         height: orientation === 'vertical' ? `${shipObj.size * 2}rem` : '2rem',
+                                        position: "relative",
+                                        overflow: "hidden",
                                     }}
                                 >
-                                    {shipObj.size}
+                                    <span
+                                        style={{
+                                            writingMode: orientation === "vertical" ? "vertical-rl" : "horizontal-tb",
+                                            textOrientation: "upright",
+                                        }}
+                                    >
+                                        {shipObj.name}
+                                    </span>
                                 </div>
                             ))}
                     </div>
@@ -407,12 +495,12 @@ export default function Room() {
 
             <div className="flex gap-10">
                 <div>
-                    <h3 className="mb-2 font-semibold">La tua griglia</h3>
+                    <h3 className="mb-2 font-semibold">La tua rete</h3>
                     {renderGridWithLabels(myGrid, () => {}, true, true)}
                 </div>
 
                 <div>
-                    <h3 className="mb-2 font-semibold">Campo nemico</h3>
+                    <h3 className="mb-2 font-semibold">Rete avversaria</h3>
                     {renderGridWithLabels(enemyGrid, (r, c) => attack(r, c), false)}
                     <p className="mt-2">{myTurn ? "Tocca a te!" : "Turno avversario..."}</p>
                 </div>

@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 const server = http.createServer(app);
+const User = require('./models/User');
 
 app.use(cors());
 app.use(express.json());
@@ -54,7 +55,7 @@ io.use(async (socket, next) => {
 io.on("connection", (socket) => {
     console.log("Utente connesso:", socket.user.id);
 
-    socket.on("joinRoom", (roomId) => {
+    socket.on("joinRoom", async (roomId) => {
         const room = io.sockets.adapter.rooms.get(roomId);
         if (room && room.size >= 2) {
             socket.emit("roomFull", "La stanza è già piena (2 giocatori).");
@@ -66,8 +67,18 @@ io.on("connection", (socket) => {
 
         if (!games[roomId]) games[roomId] = { players: {}, order: [], turn: null };
 
+        // 👇 recupero lo username dal DB
+        let username = socket.user.id;
+        try {
+            const dbUser = await User.findById(socket.user.id).lean();
+            if (dbUser) username = dbUser.username;
+        } catch (err) {
+            console.error("Errore lookup username:", err.message);
+        }
+
         games[roomId].players[socket.id] = {
             userId: socket.user.id,
+            username,            // 👈 salvo anche username
             ready: false,
             shipsList: [],
             shipCells: new Set(),
@@ -79,10 +90,8 @@ io.on("connection", (socket) => {
 
         socket.to(roomId).emit("message", `Un nuovo utente si è unito alla stanza ${roomId}`);
 
-        // Se sono in 2, informo entrambi che possono prepararsi
         const updatedRoom = io.sockets.adapter.rooms.get(roomId);
         if (updatedRoom && updatedRoom.size === 2) {
-            // Notifica visiva “siamo in 2”: il client manterrà l’attesa finché non sono entrambi ready
             io.to(roomId).emit("bothConnected", { roomId, players: Array.from(updatedRoom) });
         }
     });
@@ -145,10 +154,10 @@ io.on("connection", (socket) => {
 
         const cell = `${y},${x}`; // NB: manteniamo convenzione r=y, c=x
         if (attacker.moves.has(cell)) {
-            socket.emit("errorMessage", "Hai già sparato in questa cella.");
+            socket.emit("moveIgnored", { x, y });
             return;
-        }
-        attacker.moves.add(cell);
+        }attacker.moves.add(cell);
+
 
         const hit = defender.shipCells.has(cell);
         let sunk = false;
@@ -172,7 +181,7 @@ io.on("connection", (socket) => {
 
         // Win check (tutte le celle nave colpite)
         if (defender.hitsReceived.size >= defender.shipCells.size && defender.shipCells.size > 0) {
-            io.to(roomId).emit("gameOver", { winner: attacker.userId });
+            io.to(roomId).emit("gameOver", { winner: attacker.username });
             delete games[roomId];
             return;
         }

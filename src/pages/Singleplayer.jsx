@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import '../assets/style4.css';
 import React, { useState, useEffect, useRef } from 'react';
 
+
 const GRID_SIZE = 10;
 const LETTERS = 'ABCDEFGHIJ'.split('');
 
@@ -11,6 +12,23 @@ const INITIAL_SHIPS = [
     { size: 3, count: 2 },
     { size: 2, count: 1 },
 ];
+
+// 👇 Mappa icone per sistema (solo visuale)
+const SYSTEM_EMOJI = {
+    'Data Center': '🖥️',
+    'Firewall': '🔥',
+    'Server Web': '🌐',
+    'Database': '🗄️',
+    'Router': '📡',
+};
+
+// 👇 Coda di sistemi da assegnare per misura (usata SOLO per decidere l’icona)
+const initialSystemQueues = {
+    5: ['Data Center'],
+    4: ['Firewall'],
+    3: ['Server Web', 'Database'], // due navi da 3: prima Server Web, poi Database
+    2: ['Router'],
+};
 
 const BattleshipGame = () => {
     const [playerGrid, setPlayerGrid] = useState(createEmptyGrid());
@@ -26,6 +44,9 @@ const BattleshipGame = () => {
     const [botMode, setBotMode] = useState('hunt');
     const [botDirection, setBotDirection] = useState(null);
     const [lastHit, setLastHit] = useState(null);
+
+    // 👇 Stato SOLO per assegnare il tipo/emoji al momento del piazzamento
+    const [systemQueues, setSystemQueues] = useState(initialSystemQueues);
 
     const navigate = useNavigate();
     const overlayRef = useRef(null);
@@ -58,12 +79,15 @@ const BattleshipGame = () => {
             const timer = setTimeout(() => setPlacementTimeLeft((t) => t - 1), 1000);
             return () => clearTimeout(timer);
         } else if (isPlacing && placementTimeLeft <= 0) {
-            const completedGrid = placeRemainingShips(playerGrid, availableShips);
+            // ⏱️ Autoplace rimanenti + assegna icone
+            const { grid: completedGrid, queues: leftoverQueues } =
+                placeRemainingShips(playerGrid, availableShips, systemQueues);
             setPlayerGrid(completedGrid);
+            setSystemQueues(leftoverQueues);
             setBotGrid(placeShipsRandomly());
             setIsPlacing(false);
             setPlayerTurn(true);
-            setMessage('Tempo scaduto! Le navi rimanenti sono state piazzate automaticamente. La partita inizia!');
+            setMessage('Tempo scaduto! I sistemi rimanenti sono stati piazzati automaticamente. La cyber-battaglia inizia!');
         }
     }, [isPlacing, placementTimeLeft]);
 
@@ -86,6 +110,7 @@ const BattleshipGame = () => {
                         for (let i = 0; i < ship.size; i++) {
                             const r = row + (orientation === 'vertical' ? i : 0);
                             const c = col + (orientation === 'horizontal' ? i : 0);
+                            // Per il BOT non serve assegnare systemType (icone nascoste)
                             grid[r][c] = { ...grid[r][c], hasShip: true };
                         }
                         placed = true;
@@ -106,8 +131,21 @@ const BattleshipGame = () => {
         return true;
     }
 
-    function placeRemainingShips(grid, ships) {
+    // 👇 Autoplace dei rimanenti per il GIOCATORE, con assegnazione icone
+    function placeRemainingShips(grid, ships, queues) {
         const newGrid = grid.map((row) => row.map((cell) => ({ ...cell })));
+        // deep copy semplice delle code
+        const newQueues = Object.fromEntries(
+            Object.entries(queues || {}).map(([k, v]) => [k, Array.isArray(v) ? [...v] : []])
+        );
+        const fallbackBySize = (size) => {
+            if (size === 5) return 'Data Center';
+            if (size === 4) return 'Firewall';
+            if (size === 3) return (newQueues[3] && newQueues[3].length === 1) ? newQueues[3][0] : 'Server Web';
+            if (size === 2) return 'Router';
+            return 'Sistema';
+        };
+
         for (const ship of ships) {
             for (let n = 0; n < ship.count; n++) {
                 let placed = false;
@@ -116,17 +154,21 @@ const BattleshipGame = () => {
                     const row = Math.floor(Math.random() * GRID_SIZE);
                     const col = Math.floor(Math.random() * GRID_SIZE);
                     if (canPlaceShip(newGrid, row, col, ship.size, orientation)) {
+                        // prendi il tipo dalla coda di quella misura
+                        const q = newQueues[ship.size] || [];
+                        const systemType = q.length ? q.shift() : fallbackBySize(ship.size);
                         for (let i = 0; i < ship.size; i++) {
                             const r = row + (orientation === 'vertical' ? i : 0);
                             const c = col + (orientation === 'horizontal' ? i : 0);
                             newGrid[r][c].hasShip = true;
+                            newGrid[r][c].systemType = systemType;
                         }
                         placed = true;
                     }
                 }
             }
         }
-        return newGrid;
+        return { grid: newGrid, queues: newQueues };
     }
 
     function checkWin(grid) {
@@ -140,22 +182,36 @@ const BattleshipGame = () => {
         if (!isPlacing || !size) return;
         const newGrid = playerGrid.map((r) => r.map((cell) => ({ ...cell })));
         if (canPlaceShip(newGrid, startRow, startCol, size, orientation)) {
+            // 👇 tipo (e icona) da assegnare alla nave che stai piazzando ORA
+            const typeQueue = systemQueues[size] || [];
+            const systemType = typeQueue.length ? typeQueue[0] : (size === 3 ? 'Server Web' : size === 5 ? 'Data Center' : size === 4 ? 'Firewall' : 'Router');
+
             for (let i = 0; i < size; i++) {
                 const r = startRow + (orientation === 'vertical' ? i : 0);
                 const c = startCol + (orientation === 'horizontal' ? i : 0);
                 newGrid[r][c].hasShip = true;
+                newGrid[r][c].systemType = systemType; // 👉 salva il tipo per mostrare l’icona
             }
             setPlayerGrid(newGrid);
+
+            // aggiorna conteggio navi disponibili (logica invariata)
             const updatedShips = availableShips.map((ship) =>
                 ship.size === size && ship.count > 0 ? { ...ship, count: ship.count - 1 } : ship
             );
             setAvailableShips(updatedShips);
+
+            // scala la coda del tipo usato SOLO se abbiamo piazzato correttamente
+            setSystemQueues((prev) => ({
+                ...prev,
+                [size]: (prev[size] && prev[size].length) ? prev[size].slice(1) : [],
+            }));
+
             const allPlaced = updatedShips.every((ship) => ship.count === 0);
             if (allPlaced) {
                 setIsPlacing(false);
                 setBotGrid(placeShipsRandomly());
                 setPlayerTurn(true);
-                setMessage('Hai posizionato tutte le navi. La partita inizia!');
+                setMessage('Hai posizionato tutti i sistemi. La cyber-battaglia inizia!');
             } else {
                 setMessage('');
             }
@@ -171,9 +227,9 @@ const BattleshipGame = () => {
 
         const coord = formatCoordinate(row, col);
         if (newBotGrid[row][col].hasShip) {
-            setMessage(`💥 Colpito a ${coord}!`);
+            setMessage(`💥 Attacco riuscito a ${coord}!`);
         } else {
-            setMessage(`💦 Mancato a ${coord}.`);
+            setMessage(`🛡️ Tentativo bloccato a ${coord}.`);
         }
 
         setBotGrid(newBotGrid);
@@ -319,6 +375,14 @@ const BattleshipGame = () => {
         if (previewCells.includes(key)) {
             bg = canPlacePreviewCell(key) ? 'bg-yellow-300' : 'bg-red-300';
         }
+
+        // 👇 Contenuto dell’icona (solo se è una tua nave e la vuoi mostrare)
+        let content = null;
+        if (showShips && cell.hasShip && !cell.hit) {
+            const emoji = SYSTEM_EMOJI[cell.systemType] || '💻';
+            content = <span style={{ fontSize: '1rem', lineHeight: 1 }}>{emoji}</span>;
+        }
+
         return (
             <div
                 className={`w-8 h-8 border border-black flex items-center justify-center ${bg}`}
@@ -345,7 +409,9 @@ const BattleshipGame = () => {
                 onDragLeave={() => {
                     setPreviewCells((prev) => prev.filter((p) => p !== `${row}-${col}`));
                 }}
-            />
+            >
+                {content}
+            </div>
         );
     };
 
@@ -449,6 +515,7 @@ const BattleshipGame = () => {
         setBotMode('hunt');
         setBotDirection(null);
         setLastHit(null);
+        setSystemQueues(initialSystemQueues); // reset coda dei tipi/icone
     };
 
     return (
@@ -461,7 +528,7 @@ const BattleshipGame = () => {
                 <button onClick={chiudiPopup} className="px-3 py-1 bg-gray-400 rounded">No</button>
             </div>
 
-            <h1 className="text-xl font-bold mb-4">Battaglia Navale vs Bot</h1>
+            <h1 className="text-xl font-bold mb-4">Attacco informatico vs Bot </h1>
 
             {isPlacing && (
                 <div className="mb-4">
@@ -476,7 +543,16 @@ const BattleshipGame = () => {
                     <div className="flex gap-2 flex-wrap">
                         {availableShips
                             .flatMap((ship) =>
-                                Array.from({ length: ship.count }).map((_, i) => ({ size: ship.size, key: `${ship.size}-${i}` }))
+                                Array.from({ length: ship.count }).map((_, i) => {
+                                    // Nome del sistema in base alla dimensione e all’indice (per distinguere i due da 3)
+                                    let systemName = '';
+                                    if (ship.size === 5) systemName = 'Data Center';
+                                    else if (ship.size === 4) systemName = 'Firewall';
+                                    else if (ship.size === 3) systemName = i === 0 ? 'Server Web' : 'Database';
+                                    else if (ship.size === 2) systemName = 'Router';
+
+                                    return { size: ship.size, key: `${ship.size}-${i}`, name: systemName };
+                                })
                             )
                             .map((shipObj) => (
                                 <div
@@ -499,15 +575,26 @@ const BattleshipGame = () => {
                                         const payload = JSON.stringify({ size: shipObj.size, offset });
                                         e.dataTransfer.setData('application/json', payload);
                                     }}
-                                    className="bg-gray-400 text-white flex items-center justify-center rounded cursor-move"
+                                    className="bg-gray-400 text-white flex items-center justify-center rounded cursor-move text-sm font-semibold"
                                     style={{
                                         width: orientation === 'horizontal' ? `${shipObj.size * 2}rem` : '2rem',
                                         height: orientation === 'vertical' ? `${shipObj.size * 2}rem` : '2rem',
+                                        position: "relative",
+
+                                        overflow: "hidden",
                                     }}
                                 >
-                                    {shipObj.size}
+<span
+    style={{
+        writingMode: orientation === "vertical" ? "vertical-rl" : "horizontal-tb",
+        textOrientation: "upright",
+    }}
+>
+  {shipObj.name}
+</span>
                                 </div>
                             ))}
+
                     </div>
                 </div>
             )}

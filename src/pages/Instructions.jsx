@@ -11,31 +11,46 @@ function Instructions() {
 
     return (
         <div className="instructions-container">
-            <h1>Regole del Gioco - DUE</h1>
+            <h1>⚓ Regole del Gioco - Hack & Sink</h1>
 
             <h2>🎯 Obiettivo del Gioco</h2>
-            <p>L'obiettivo è essere il primo giocatore a rimanere senza carte in mano.</p>
-
-            <h2>🃏 Regole di Base</h2>
-            <ul>
-                <li>Ogni giocatore inizia con ? carte.</li>
-                <li>Si gioca in senso orario.</li>
-                <li>Devi scartare una carta che combacia per colore o numero con quella sul mazzo centrale.</li>
-                <li>Se non puoi giocare, pesca una carta dal mazzo.</li>
-            </ul>
-
-            <h2>✨ Carte Speciali</h2>
-            <ul>
-                <li><strong>+2</strong>: Il giocatore successivo pesca 2 carte e salta il turno.</li>
-                <li><strong>Inverti</strong>: Cambia il senso di gioco.</li>
-                <li><strong>Salta</strong>: Salta il turno del prossimo giocatore.</li>
-                <li><strong>Cambia Colore</strong>: Puoi cambiare il colore corrente del gioco.</li>
-                <li><strong>+4</strong>: Pesca 4 + cambio colore (usala solo se non hai altre carte giocabili).</li>
-            </ul>
-
-            <h2>🚨 DUE!</h2>
             <p>
-                Quando resti con 2 carte in mano, devi dichiarare "DUE!" entro pochi secondi. Se non lo fai e vieni scoperto, dovrai pescare 2 carte come penalità.
+                Scoprire e compromettere per primo tutti i sistemi informatici dell’avversario:
+                Datacenter, Firewall, Webserver, Database e Router.
+            </p>
+
+            <h2>🛠️ Preparazione</h2>
+            <ul>
+                <li>Ogni giocatore ha una griglia (10x10 o stabilita).</li>
+                <li>Si posizionano i 5 sistemi in verticale o orizzontale senza sovrapporli:</li>
+                <ul>
+                    <li><strong>Datacenter</strong> (5 celle)</li>
+                    <li><strong>Firewall</strong> (4 celle)</li>
+                    <li><strong>Webserver</strong> (3 celle)</li>
+                    <li><strong>Database</strong> (3 celle)</li>
+                    <li><strong>Router</strong> (2 celle)</li>
+                </ul>
+            </ul>
+
+            <h2>💻 Svolgimento</h2>
+            <ul>
+                <li>I giocatori si alternano dichiarando una coordinata di attacco (es. C5).</li>
+                <li>Se colpisci un sistema: <strong>COLPITO</strong>.</li>
+                <li>Se tutte le celle di un sistema sono colpite: <strong>Sistema Compromesso</strong>.</li>
+                <li>Se non colpisci nulla: <strong>MANCATO</strong>.</li>
+            </ul>
+
+            <h2>🕹️ Modalità di Gioco</h2>
+            <ul>
+                <li><strong>Contro il Bot</strong>: sfida un bot e metti alla prova la tua strategia.</li>
+                <li><strong>Multiplayer</strong>: gioca contro un amico creando una <em>stanza privata</em>.</li>
+                <li>Il giocatore che crea la stanza sceglie il <strong>nome della stanza</strong>, che dovrà poi essere condiviso per permettere all’amico di entrare.</li>
+            </ul>
+
+            <h2>🏆 Vittoria</h2>
+            <p>
+                Vince chi compromette per primo tutti i sistemi avversari, ovvero affonda l’intera
+                infrastruttura nemica.
             </p>
 
             <button onClick={goBack}>🔙 Torna al Menu</button>
