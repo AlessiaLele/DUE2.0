@@ -206,7 +206,7 @@ export default function Room() {
                             const c = col + (ori === 'horizontal' ? i : 0);
                             grid[r][c].hasShip = true;
                             grid[r][c].systemType = systemType; // 👈 salva il tipo per l’icona
-                            cells.push({ r, c });
+                            cells.push({ r, c, systemType });
                         }
                         groups.push(cells);
                         placed = true;
@@ -236,7 +236,7 @@ export default function Room() {
                 const c = startCol + (orientation === 'horizontal' ? i : 0);
                 newGrid[r][c].hasShip = true;
                 newGrid[r][c].systemType = systemType; // 👈 assegna tipo per mostrare l’icona
-                cells.push({ r, c });
+                cells.push({ r, c, systemType });
             }
             setMyGrid(newGrid);
 

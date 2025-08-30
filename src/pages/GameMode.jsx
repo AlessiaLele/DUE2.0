@@ -21,7 +21,7 @@ const GameMode = () => {
                     🤖 Gioca contro un bot
                 </button>
                 <button className="mode-button multiplayer" onClick={playMultiplayer}>
-                    👥 Multiplayer
+                    👥 Gioca con un amico
                 </button>
             </div>
         </div>

@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import '../assets/style4.css';
 import React, { useState, useEffect, useRef } from 'react';
-
+import Cookies from "js-cookie";
+import axios from "axios";
 
 const GRID_SIZE = 10;
 const LETTERS = 'ABCDEFGHIJ'.split('');
@@ -73,7 +74,65 @@ const BattleshipGame = () => {
     const confermaUscita = () => {
         navigate('/menu-page');
     };
+    useEffect(() => {
+        const sessionId = Cookies.get("battleship_session");
+        if (!sessionId) {
+            const newSessionId = crypto.randomUUID();
+            Cookies.set("battleship_session", newSessionId, { expires: 7 });
+        } else {
+            // 🔹 recupera stato dal server se esiste
+            axios.get(`http://localhost:4000/game/${sessionId}`).then(res => {
+                if (res.data?.playerGrid) {
+                    setPlayerGrid(res.data.playerGrid);
+                    setBotGrid(res.data.botGrid);
+                    setIsPlacing(res.data.isPlacing);
+                    setOrientation(res.data.orientation);
+                    setPlacementTimeLeft(res.data.placementTimeLeft);
+                    setMessage(res.data.message);
+                    setPlayerTurn(res.data.playerTurn);
+                    setAvailableShips(res.data.availableShips);
+                    setPreviewCells(res.data.previewCells);
+                    setBotTargets(res.data.botTargets);
+                    setBotMode(res.data.botMode);
+                    setBotDirection(res.data.botDirection);
+                    setLastHit(res.data.lastHit);
+                    setSystemQueues(res.data.systemQueues);
+                }
+            }).catch(() => {});
+        }
+    }, []);
 
+// 🔹 ogni volta che cambia lo stato principale → salva
+    useEffect(() => {
+        const sessionId = Cookies.get("battleship_session");
+        if (!sessionId) return;
+
+        const gameState = {
+            playerGrid,
+            botGrid,
+            isPlacing,
+            orientation,
+            placementTimeLeft,
+            message,
+            playerTurn,
+            availableShips,
+            previewCells,
+            botTargets,
+            botMode,
+            botDirection,
+            lastHit,
+            systemQueues,
+        };
+
+        axios.post("http://localhost:4000/game/save", {
+            sessionId,
+            state: gameState
+        }).catch(() => {});
+    }, [
+        playerGrid, botGrid, isPlacing, orientation, placementTimeLeft,
+        message, playerTurn, availableShips, previewCells,
+        botTargets, botMode, botDirection, lastHit, systemQueues
+    ]);
     useEffect(() => {
         if (isPlacing && placementTimeLeft > 0) {
             const timer = setTimeout(() => setPlacementTimeLeft((t) => t - 1), 1000);

@@ -17,24 +17,7 @@ const io = new Server(server, {
     cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-/**
- * Stato:
- * games[roomId] = {
- *   players: {
- *     [socketId]: {
- *       userId,
- *       ready: boolean,
- *       // shipsList: array di navi, ognuna è array di celle: ["r,c", "r,c", ...]
- *       shipsList: string[][],
- *       shipCells: Set<string>,       // tutte le celle nave (per check rapido)
- *       hitsReceived: Set<string>,    // celle colpite dal nemico sul mio campo
- *       moves: Set<string>,           // celle in cui ho già sparato (per prevenire doppioni)
- *     }
- *   },
- *   order: string[],     // [socketId1, socketId2]
- *   turn: string|null,   // socketId di chi deve tirare
- * }
- */
+
 const games = {};
 
 const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000/api/auth";
@@ -46,6 +29,7 @@ io.use(async (socket, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         socket.user = decoded;
+
         return next();
     } catch {
         return next(new Error("Token non valido"));
@@ -68,13 +52,8 @@ io.on("connection", (socket) => {
         if (!games[roomId]) games[roomId] = { players: {}, order: [], turn: null };
 
         // 👇 recupero lo username dal DB
-        let username = socket.user.id;
-        try {
-            const dbUser = await User.findById(socket.user.id).lean();
-            if (dbUser) username = dbUser.username;
-        } catch (err) {
-            console.error("Errore lookup username:", err.message);
-        }
+        let username = socket.user.username;
+
 
         games[roomId].players[socket.id] = {
             userId: socket.user.id,

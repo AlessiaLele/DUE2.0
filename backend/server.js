@@ -12,8 +12,17 @@ const app    = express();
 const server = http.createServer(app);
 
 // Middlewares
+const cookieParser = require('cookie-parser');
 
-app.use(cors());
+const corsOptions = {
+    origin: "http://localhost:3001",// la porta del tuo frontend React
+    credentials: true               // 👈 fondamentale per invio cookie
+};
+
+app.use(cors(corsOptions));
+
+app.use(cookieParser());
+
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 
@@ -33,7 +42,6 @@ app.use('/api/auth', authRoutes);
     }
 })();
 
-// In-memory state
 
 
 // Start server

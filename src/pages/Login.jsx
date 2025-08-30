@@ -14,35 +14,47 @@ function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+
         const formData = new FormData(e.target);
         const body = {
             email: formData.get('email'),
-            password: formData.get('password')
+            password: formData.get('password'),
+            consent: true
         };
 
         try {
             const res = await fetch('http://localhost:3000/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
+                credentials: 'include'
             });
 
             const data = await res.json();
             if (res.ok) {
-                localStorage.setItem('token', data.token);
+                localStorage.setItem("token", data.token);
+
+                // 🔹 Controlla se l’utente ha accettato i cookie
+                const cookieConsent = localStorage.getItem("cookie_consent");
+                if (!cookieConsent) {
+                    alert("Devi accettare i cookie prima di accedere.");
+                    return; // ❌ niente navigate
+                }
+
                 alert(`Benvenuto, ${data.username}`);
                 navigate('/menu-page');
             } else {
-                alert(data.msg);
+                alert(data.msg || 'Errore durante il login');
             }
-        } catch {
+        } catch (err) {
+            console.error(err);
             alert('Errore di rete');
         }
     };
 
-    // Invia OTP alla mail
     const handleSendOtp = async (e) => {
         e.preventDefault();
+
         const formData = new FormData(e.target.form);
         const email = formData.get('email');
 
@@ -50,7 +62,8 @@ function Login() {
             const res = await fetch('http://localhost:3000/api/auth/send-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email }),
+                credentials: 'include'
             });
 
             const data = await res.json();
@@ -58,29 +71,32 @@ function Login() {
                 setOtpSent(true);
                 alert(data.msg);
             } else {
-                alert(data.msg);
+                alert(data.msg || 'Errore nell\'invio OTP');
             }
-        } catch {
+        } catch (err) {
+            console.error(err);
             alert('Errore di rete');
         }
     };
 
-    // Conferma registrazione con OTP
     const handleRegister = async (e) => {
         e.preventDefault();
+
         const formData = new FormData(e.target);
         const body = {
             username: formData.get('username'),
             email: formData.get('email'),
             password: formData.get('password'),
-            otp: formData.get('otp')
+            otp: formData.get('otp'),
+            consent: true // flag per il backend
         };
 
         try {
             const res = await fetch('http://localhost:3000/api/auth/verify-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
+                credentials: 'include'
             });
 
             const data = await res.json();
@@ -89,9 +105,10 @@ function Login() {
                 setIsLogin(true);
                 navigate('/menu-page');
             } else {
-                alert(data.msg);
+                alert(data.msg || 'Errore nella registrazione');
             }
-        } catch {
+        } catch (err) {
+            console.error(err);
             alert('Errore di rete');
         }
     };

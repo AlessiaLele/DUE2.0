@@ -8,13 +8,20 @@ import GameMode from "./pages/GameMode";
 import Singleplayer from "./pages/Singleplayer";
 import Instructions from "./pages/Instructions";
 import Lobby from "./pages/Lobby";
+import CookieConsent from "./pages/CookieConsent";
+
 
 import Room from "./pages/Room";
 
 function App() {
+
+
     return (
         <Router>
+           <CookieConsent/>
+
             <Routes>
+
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/menu-page" element={<MenuPage />} />

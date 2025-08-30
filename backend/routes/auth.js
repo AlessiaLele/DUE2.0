@@ -12,22 +12,53 @@ let otpStore = {}; // { email: { code: '123456', expires: Date } }
 
 // LOGIN
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, consent } = req.body;
 
     try {
+        console.log("Tentativo login:", email);
+
         const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ msg: 'Credenziali non valide' });
+        if (!user) {
+            console.log("Utente non trovato");
+            return res.status(400).json({ msg: 'Credenziali non valide' });
+        }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: 'Credenziali non valide' });
+        if (!isMatch) {
+            console.log("Password errata");
+            return res.status(400).json({ msg: 'Credenziali non valide' });
+        }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET/*|| JWT_SECRET1*/, { expiresIn: '1h' });
+        if (!process.env.JWT_SECRET) {
+            console.error("❌ JWT_SECRET non definito in .env");
+            return res.status(500).json({ msg: "Configurazione server errata (manca JWT_SECRET)" });
+        }
 
-        res.json({ token, username: user.username });
+        const token = jwt.sign(
+            { id: user._id , username: user.username},
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // Se l'utente ha dato il consenso, setta il cookie
+        if (consent) {
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: false, // ⚠️ metti true se usi HTTPS
+                sameSite: "Lax",
+                maxAge: 60 * 60 * 1000
+            });
+        }
+
+        // 👇 restituisco anche il token in JSON
+        res.json({ username: user.username, token });
     } catch (err) {
-        res.status(500).json({ msg: 'Errore del server' });
+        console.error("Errore in /login:", err);
+        res.status(500).json({ msg: 'Errore del server', error: err.message });
     }
 });
+
+
 
 // Configura nodemailer con Ethereal
 async function createTransporter() {
@@ -93,6 +124,21 @@ router.post('/verify-otp', async (req, res) => {
         res.status(500).json({ msg: 'Errore del server', error: err.message });
     }
 });
+const authMiddleware = require("../middleware/authMiddleware");
+
+router.get("/profile", authMiddleware, (req, res) => {
+    res.json({ msg: "Profilo utente", user: req.user });
+});
+
+router.post("/logout", (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "Lax"
+    });
+    res.json({ msg: "Logout effettuato" });
+});
+
 
 
 module.exports = router;
