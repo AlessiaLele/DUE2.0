@@ -72,6 +72,9 @@ const BattleshipGame = () => {
     };
 
     const confermaUscita = () => {
+        Cookies.remove("battleship_session");
+        resetGame();
+
         navigate('/menu-page');
     };
     useEffect(() => {
