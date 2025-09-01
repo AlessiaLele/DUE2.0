@@ -1,13 +1,16 @@
+
+
 .instructions-container {
     max-width: 800px;
-    margin: 0 auto;
+    margin: 0 auto;  /* centrato orizzontalmente */
     background-color: white;
-    padding: 40px;
-    border-radius: 15px;
+    padding: 30px;
+    border-radius: 30px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     font-family: 'Segoe UI', sans-serif;
     padding-top: 5px;
     padding-bottom: 5px;
+
 }
 
 .instructions-container h1 {
@@ -47,4 +50,8 @@
 
 .instructions-container button:hover {
     background-color: #2471a3;
+}
+
+.custom-shadow {
+    box-shadow: 0 10px 30px rgba(10, 10, 0, 10); /* più grande e più scura */
 }

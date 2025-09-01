@@ -578,6 +578,7 @@ const BattleshipGame = () => {
     };
 
     return (
+        <div className="d-flex justify-content-center align-items-center vh-100">
         <div className="p-4">
             <button id="exit-btn" onClick={apriPopup} className="mb-4 px-3 py-1 bg-red-600 text-white rounded">Esci</button>
             <div id="overlay" ref={overlayRef} onClick={chiudiPopup} style={{ display: 'none' }}></div>
@@ -680,6 +681,7 @@ const BattleshipGame = () => {
                     Ricomincia
                 </button>
             )}
+        </div>
         </div>
     );
 };

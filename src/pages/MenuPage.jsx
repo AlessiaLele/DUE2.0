@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "../assets/style3.css";
 
 const MenuPage = () => {
@@ -51,11 +52,14 @@ const MenuPage = () => {
     };
 
     return (
+        <div className="d-flex justify-content-center align-items-center vh-100">
         <div className="menu-container">
-            <h1>Hack&Sink</h1>
+
+            <h1 className="welcome-title"><strong> Hack & Sink</strong> </h1>
             <button className="menu-button" onClick={startGame}>▶️ Gioca</button>
             <button className="menu-button secondary" onClick={showInstructions}>❓ Istruzioni</button>
             <button className="menu-button danger" onClick={exitGame}>↩️ Log Out</button>
+        </div>
         </div>
     );
 };

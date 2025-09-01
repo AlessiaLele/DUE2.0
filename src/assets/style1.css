@@ -1,46 +1,105 @@
+/*html, body {*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    height: 100%;*/
+/*    width: 100%;*/
+/*}*/
+
+/*!* Container principale *!*/
+/*.container {*/
+/*    height: 100vh;*/
+/*    width: 100vw;*/
+/*    background: linear-gradient(165deg, #667cea, #4243aa);*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;*/
+/*}*/
+
+/*!* Header *!*/
+/*header {*/
+/*    font-size: 3rem;*/
+/*    margin: 20px 30px;*/
+/*    text-align: left;*/
+/*    color: #000000;*/
+/*}*/
+
+/*!* Centro *!*/
+/*.center {*/
+/*    flex: 1;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*}*/
+
+/*!* Pulsante *!*/
+/*.button {*/
+/*    font-size: 1.5em;*/
+/*    padding: 10px 30px;*/
+/*    border: #2c3e50 0.5px solid;*/
+/*    border-radius: 10px;*/
+/*    background-color: #005a8b;*/
+/*    color: black;*/
+/*    text-decoration: none;*/
+/*    cursor: pointer;*/
+/*    display: inline-block;*/
+/*    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);*/
+/*}*/
+
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
-    width: 100%;
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(165deg, #667cea, #4243aa); /*sfondo corpo generale*/
 }
 
-/* Container principale */
-.container {
+/* Container personalizzato */
+.welcome-container {
     height: 100vh;
     width: 100vw;
-    background: linear-gradient(165deg, #667cea, #4243aa);
-    display: flex;
-    flex-direction: column;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
-/* Header */
-header {
-    font-size: 3rem;
-    margin: 20px 30px;
-    text-align: left;
-    color: #000000;
-}
-
-/* Centro */
-.center {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Pulsante */
-.button {
-    font-size: 1.5em;
-    padding: 10px 30px;
-    border: #2c3e50 0.5px solid;
-    border-radius: 10px;
-    background-color: #005a8b;
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-    display: inline-block;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* Effetto vetro */
+.glass-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Titolo */
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+}
+
+/* Sottotitolo motivazionale */
+.welcome-subtitle {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: #f0f0f0;
+}
+
+/* Pulsante Play personalizzato */
+.play-button {
+    font-size: 1.4rem;
+    padding: 12px 40px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #0066ff, #182b4c);
+    color: white;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.play-button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 15px rgba(0, 114, 255, 0.4);
 }

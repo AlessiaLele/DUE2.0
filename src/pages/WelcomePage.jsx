@@ -1,56 +1,37 @@
 import React from "react";
-
 import { Link } from "react-router-dom";
-
 import Button from "@mui/material/Button";
-
 import Container from "@mui/material/Container";
-
 import Typography from "@mui/material/Typography";
-
 import Card from "@mui/material/Card";
-
 import CardContent from "@mui/material/CardContent";
-
 import "bootstrap/dist/css/bootstrap.min.css";
-
-import "../assets/style1.css"; // resta valido per ulteriori personalizzazioni
+import "../assets/style1.css";
 
 function WelcomePage() {
-
     return (
-        <Container className="d-flex justify-content-center align-items-center vh-100">
-            <Card className="shadow-lg p-3 mb-5 bg-white rounded text-center" style={{ maxWidth: 1000 }}>
+        <Container className="welcome-container">
+            <Card className="glass-card text-center p-4" style={{ maxWidth: 800, minWidth: 600 }}>
                 <CardContent>
-                    <Typography variant="h4" gutterBottom>
-
-                        Benvenuto su
-                        <p><strong>Hack & Sink!!</strong></p>
+                    <Typography variant="h3" className="welcome-title" gutterBottom>
+                        Benvenuto in <span style={{ color: "#ffd700" }}>Hack & Sink</span> 👾
                     </Typography>
-                    <div className="mt-4">
+                    <Typography className="welcome-subtitle" gutterBottom>
+                       </Typography>
+                    <div className="mt-5">
                         <Link to="/login" style={{ textDecoration: "none" }}>
                             <Button
-
                                 variant="contained"
-
-                                color="primary"
-
-                                size="large"
-
-                                className="w-100"
+                                className="play-button"
                             >
-
-                                Gioca
+                                ▶ Inizia a Giocare
                             </Button>
                         </Link>
                     </div>
                 </CardContent>
             </Card>
         </Container>
-
     );
-
 }
 
 export default WelcomePage;
-

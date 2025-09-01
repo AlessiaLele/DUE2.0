@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid"; // per generare ID casuali
+import { v4 as uuidv4 } from "uuid";
+
+// Material UI
+import { Card, CardContent, Typography, TextField, Button, Divider } from "@mui/material";
 
 export default function Lobby() {
     const [roomName, setRoomName] = useState("");
@@ -19,29 +22,61 @@ export default function Lobby() {
     };
 
     return (
-        <div style={{ padding: "20px" }}>
-            <h2>Lobby</h2>
-            <p>Puoi creare una stanza privata per giocare con un amico oppure unirti a una stanza esistente.</p>
+        <div className="d-flex justify-content-center align-items-center vh-100 ">
+            <Card sx={{ width: 500, borderRadius: 3, boxShadow: 4, padding: 3 }}>
+                <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                        Pronto ad <strong> hackerare </strong> il nemico?
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Puoi creare una stanza privata per giocare con un amico oppure unirti a una stanza esistente.
+                    </Typography>
 
-            {/* Creazione stanza */}
-            <input
-                type="text"
-                value={roomName}
-                onChange={(e) => setRoomName(e.target.value)}
-                placeholder="Nome stanza (opzionale)"
-            />
-            <button onClick={createRoom}>Crea stanza privata</button>
+                    {/* Creazione stanza */}
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        label="Dai un nome alla tua stanza "
+                        value={roomName}
+                        onChange={(e) => setRoomName(e.target.value)}
+                        variant="outlined"
+                    />
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={createRoom}
+                        sx={{ mb: 2, borderRadius: 2 }}
+                    >
+                        Crea stanza
+                    </Button>
 
-            <hr />
+                    <Divider sx={{ my: 2 }}>Oppure</Divider>
 
-            {/* Join stanza esistente */}
-            <input
-                type="text"
-                value={joinId}
-                onChange={(e) => setJoinId(e.target.value)}
-                placeholder="ID stanza"
-            />
-            <button onClick={joinRoom}>Unisciti</button>
+                    {/* Join stanza esistente */}
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        label="ID stanza"
+                        value={joinId}
+                        onChange={(e) => setJoinId(e.target.value)}
+                        variant="outlined"
+                    />
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={joinRoom}
+                        sx={{
+                            borderRadius: 2,
+                            backgroundColor: "#28a745", // verde bootstrap
+                            "&:hover": {
+                                backgroundColor: "#218838"
+                            }
+                        }}
+                    >
+                        Unisciti
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
     );
 }

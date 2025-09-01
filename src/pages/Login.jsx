@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import "bootstrap/dist/css/bootstrap.min.css";
 import '../assets/style2.css';
 
 function Login() {
@@ -14,7 +20,6 @@ function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
         const formData = new FormData(e.target);
         const body = {
             email: formData.get('email'),
@@ -33,14 +38,11 @@ function Login() {
             const data = await res.json();
             if (res.ok) {
                 localStorage.setItem("token", data.token);
-
-                // 🔹 Controlla se l’utente ha accettato i cookie
                 const cookieConsent = localStorage.getItem("cookie_consent");
                 if (!cookieConsent) {
                     alert("Devi accettare i cookie prima di accedere.");
-                    return; // ❌ niente navigate
+                    return;
                 }
-
                 alert(`Benvenuto, ${data.username}`);
                 navigate('/menu-page');
             } else {
@@ -54,7 +56,6 @@ function Login() {
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
-
         const formData = new FormData(e.target.form);
         const email = formData.get('email');
 
@@ -81,14 +82,13 @@ function Login() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-
         const formData = new FormData(e.target);
         const body = {
             username: formData.get('username'),
             email: formData.get('email'),
             password: formData.get('password'),
             otp: formData.get('otp'),
-            consent: true // flag per il backend
+            consent: true
         };
 
         try {
@@ -114,44 +114,98 @@ function Login() {
     };
 
     return (
-        <div className="login">
-            <h2 id="formTitle">{isLogin ? 'Accedi' : 'Registrati'}</h2>
+        <div className="d-flex justify-content-center align-items-center vh-100">
+            <Card className="p-4 shadow" style={{ maxWidth: 400, width: "100%" }}>
+                <CardContent>
+                    <Typography variant="h5" className="mb-3 text-center">
+                        {isLogin ? <strong>Accedi 🔑</strong> : <strong>Registrati 🔐</strong>}
+                    </Typography>
 
-            {/* FORM LOGIN */}
-            <form
-                id="loginForm"
-                className={isLogin ? 'active' : ''}
-                onSubmit={handleLogin}
-            >
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Password" required />
-                <button type="submit">Accedi</button>
-            </form>
+                    {/* FORM LOGIN */}
+                    <form
+                        id="loginForm"
+                        className={isLogin ? 'active' : ''}
+                        onSubmit={handleLogin}
+                    >
+                        <TextField
+                            type="email"
+                            name="email"
+                            label="Email"
+                            required
+                            margin="normal"
+                            fullWidth
+                        />
+                        <TextField
+                            type="password"
+                            name="password"
+                            label="Password"
+                            required
+                            margin="normal"
+                            fullWidth
+                        />
+                        <Button type="submit" variant="contained" fullWidth className="mt-3">
+                            Accedi
+                        </Button>
+                    </form>
 
-            {/* FORM REGISTRAZIONE */}
-            <form
-                id="registerForm"
-                className={!isLogin ? 'active' : ''}
-                onSubmit={handleRegister}
-            >
-                <input type="text" name="username" placeholder="Username" required />
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Password" required />
+                    {/* FORM REGISTRAZIONE */}
+                    <form
+                        id="registerForm"
+                        className={!isLogin ? 'active' : ''}
+                        onSubmit={handleRegister}
+                    >
+                        <TextField
+                            type="text"
+                            name="username"
+                            label="Username"
+                            required
+                            margin="normal"
+                            fullWidth
+                        />
+                        <TextField
+                            type="email"
+                            name="email"
+                            label="Email"
+                            required
+                            margin="normal"
+                            fullWidth
+                        />
+                        <TextField
+                            type="password"
+                            name="password"
+                            label="Password"
+                            required
+                            margin="normal"
+                            fullWidth
+                        />
 
-                {otpSent && (
-                    <input type="text" name="otp" placeholder="Inserisci OTP ricevuto" required />
-                )}
+                        {otpSent && (
+                            <TextField
+                                type="text"
+                                name="otp"
+                                label="Inserisci OTP ricevuto"
+                                required
+                                margin="normal"
+                                fullWidth
+                            />
+                        )}
 
-                {!otpSent ? (
-                    <button type="button" onClick={handleSendOtp}>Invia OTP</button>
-                ) : (
-                    <button type="submit">Registrati</button>
-                )}
-            </form>
+                        {!otpSent ? (
+                            <Button type="button" onClick={handleSendOtp} variant="outlined" fullWidth className=" mt-3">
+                                Invia OTP
+                            </Button>
+                        ) : (
+                            <Button type="submit" variant="contained" fullWidth className="mt-3">
+                                Registrati
+                            </Button>
+                        )}
+                    </form>
 
-            <div className="toggle-link" onClick={toggleForms}>
-                {isLogin ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
-            </div>
+                    <div className="toggle-link mt-3" onClick={toggleForms}>
+                        {isLogin ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

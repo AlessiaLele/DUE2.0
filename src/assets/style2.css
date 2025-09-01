@@ -1,12 +1,11 @@
 body {
     font-family: 'Inter', sans-serif;
     background-color: #f7f7f7;
-    display: flex;
+
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    margin: 0;
-    background: linear-gradient(165deg, #667cea, #4243aa);
+
+
 }
 
 .login {
@@ -43,7 +42,9 @@ input {
     font-size: 14px;
 }
 
-button {
+
+
+button{
     font-size: 1.5em;
     padding: 10px 30px;
     border: #2c3e50 0.5px solid ;
@@ -62,4 +63,6 @@ button {
     font-size: 14px;
     margin-top: 10px;
     text-decoration: underline;
+    display: block;       /* fa occupare tutta la riga */
+    text-align: center;   /* centra il testo */
 }
