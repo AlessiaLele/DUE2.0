@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
+import React, { useState } from 'react'; //libreria per interfaccia utente
+import { useNavigate } from 'react-router-dom'; //permette di spostarmi da una pagina all altra
+import Button from "@mui/material/Button"; //bottone stilizzato
+import TextField from "@mui/material/TextField"; // importa campo di testo
+import Card from "@mui/material/Card"; // contenitore
+import CardContent from "@mui/material/CardContent"; // si mettono testo, immagini
+import Typography from "@mui/material/Typography"; //gestisce il testo
 import "bootstrap/dist/css/bootstrap.min.css";
 import '../assets/style2.css';
 
-function Login() {
-    const [isLogin, setIsLogin] = useState(true);
-    const [otpSent, setOtpSent] = useState(false);
+function Login() { //stati
+    const [isLogin, setIsLogin] = useState(true); // determina se mostrare il form di login o di registrazione
+    const [otpSent, setOtpSent] = useState(false); // indica se l'OPT è stato inviato
     const navigate = useNavigate();
 
     const toggleForms = () => {
@@ -19,12 +19,12 @@ function Login() {
     };
 
     const handleLogin = async (e) => {
-        e.preventDefault();
+        e.preventDefault();// impedisce di ricaricare automaticamente la pagina
         const formData = new FormData(e.target);
         const body = {
             email: formData.get('email'),
             password: formData.get('password'),
-            consent: true
+            consent: true //bisogna accettare i cookie
         };
 
         try {
@@ -35,7 +35,7 @@ function Login() {
                 credentials: 'include'
             });
 
-            const data = await res.json();
+            const data = await res.json(); //converte la risposta del server in oggetto js
             if (res.ok) {
                 localStorage.setItem("token", data.token);
                 const cookieConsent = localStorage.getItem("cookie_consent");

@@ -3,12 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
-
 const router = express.Router();
 
 let otpStore = {}; // { email: { code: '123456', expires: Date } }
-
-
 
 // LOGIN
 router.post('/login', async (req, res) => {
@@ -33,6 +30,7 @@ router.post('/login', async (req, res) => {
             console.error("❌ JWT_SECRET non definito in .env");
             return res.status(500).json({ msg: "Configurazione server errata (manca JWT_SECRET)" });
         }
+
 
         const token = jwt.sign(
             { id: user._id , username: user.username},
@@ -81,7 +79,7 @@ router.post('/send-otp', async (req, res) => {
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) return res.status(400).json({ msg: 'Email già registrata' });
-
+// Genera un OTP casuale a sei cifre e lo converte in stringa
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         otpStore[email] = { code: otp, expires: Date.now() + 5 * 60 * 1000 };
 
@@ -126,10 +124,12 @@ router.post('/verify-otp', async (req, res) => {
 });
 const authMiddleware = require("../middleware/authMiddleware");
 
+//Informazione del profilo, solo se l'utente è autenticato
 router.get("/profile", authMiddleware, (req, res) => {
     res.json({ msg: "Profilo utente", user: req.user });
 });
 
+//Cancella il token di sessione
 router.post("/logout", (req, res) => {
     res.clearCookie("token", {
         httpOnly: true,

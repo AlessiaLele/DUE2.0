@@ -16,8 +16,6 @@ function WelcomePage() {
                     <Typography variant="h3" className="welcome-title" gutterBottom>
                         Benvenuto in <span style={{ color: "#ffd700" }}>Hack & Sink</span> 👾
                     </Typography>
-                    <Typography className="welcome-subtitle" gutterBottom>
-                       </Typography>
                     <div className="mt-5">
                         <Link to="/login" style={{ textDecoration: "none" }}>
                             <Button
