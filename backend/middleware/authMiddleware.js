@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 function authMiddleware(req, res, next) {
-    const token = req.cookies.token;
+    const token = req.cookies.accessToken;
     if (!token) return res.status(401).json({ msg: "Non autorizzato" });
 
     try {
@@ -9,7 +9,7 @@ function authMiddleware(req, res, next) {
         req.user = decoded;
         next();
     } catch {
-        return res.status(401).json({ msg: "Token non valido" });
+        return res.status(401).json({ msg: "Token non valido o scaduto" });
     }
 }
 

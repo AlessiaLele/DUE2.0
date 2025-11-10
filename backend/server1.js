@@ -1,4 +1,3 @@
-// server1.js
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
@@ -24,15 +23,21 @@ const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000/api/auth";
 
 // Auth middleware
 io.use(async (socket, next) => {
-    const token = socket.handshake.auth?.token;
-    if (!token) return next(new Error("Token mancante"));
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        socket.user = decoded;
+    const tokenS1 = socket.handshake.auth?.tokenS1;
+    if (!tokenS1) return next(new Error("tokenS1 mancante"));
 
+    if (!process.env.JWT_S1_SECRET) {
+        console.error("JWT_S1_SECRET non definito in .env");
+        return next(new Error("Configurazione server errata"));
+    }
+
+    try {
+        const decoded = jwt.verify(tokenS1, process.env.JWT_S1_SECRET);
+        socket.user = decoded; // { id, username }
         return next();
-    } catch {
-        return next(new Error("Token non valido"));
+    } catch (err) {
+        console.error("Verifica tokenS1 fallita:", err.message);
+        return next(new Error("tokenS1 non valido"));
     }
 });
 

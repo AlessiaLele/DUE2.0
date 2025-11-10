@@ -13,17 +13,13 @@ body {
 }
 
 h1, h2 {
-
     color: #333;
-
 }
 
 /* Layout del gioco */
 
 .p-4 {
-
     padding: 1rem;
-
 }
 
 .flex {

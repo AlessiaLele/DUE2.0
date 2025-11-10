@@ -1,4 +1,4 @@
-// Room.jsx
+
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -72,8 +72,14 @@ export default function Room() {
 
     // ————— Connessione socket & join —————
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const s = io("http://localhost:5001", { auth: { token } });
+        const tokenS1 = localStorage.getItem("tokenS1");
+        const s = io("http://localhost:5001", { auth: { tokenS1 } });
+
+        if (!tokenS1) {
+            alert("tokenS1 mancante: effettua il login");
+            navigate("/"); // oppure comportamento che preferisci
+            return;
+        }
 
         s.emit("joinRoom", roomId);
 

@@ -1,5 +1,3 @@
-// backend/server.js
-
 require('dotenv').config();
 const express  = require('express');
 const http     = require('http');
@@ -13,16 +11,13 @@ const server = http.createServer(app);
 
 // Middlewares
 const cookieParser = require('cookie-parser');
-
 const corsOptions = {
     origin: "http://localhost:3001",// la porta del tuo frontend React
     credentials: true               // 👈 fondamentale per invio cookie
 };
 
 app.use(cors(corsOptions));
-
 app.use(cookieParser());
-
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 
@@ -41,8 +36,6 @@ app.use('/api/auth', authRoutes);
         process.exit(1);
     }
 })();
-
-
 
 // Start server
 const PORT = process.env.PORT || 3000;
