@@ -45,9 +45,9 @@ function Instructions() {
 
                 <h2>🕹️ Modalità di Gioco</h2>
                 <ul>
-                    <li><strong>Contro il Bot</strong>: sfida un bot e metti alla prova la tua strategia.</li>
                     <li><strong>Multiplayer</strong>: gioca contro un amico creando una <em>stanza privata</em>.</li>
-                    <li>Il giocatore che crea la stanza può inserire un <strong>nome</strong> oppure lasciare il campo vuoto: sarà generato un ID automatico da condividere.</li>                </ul>
+                    <li>Il giocatore che crea la stanza può inserire un <strong>nome</strong> oppure lasciare il campo vuoto: sarà generato un ID automatico da condividere.</li>
+                </ul>
 
                 <h2>🏆 Vittoria</h2>
                 <p>

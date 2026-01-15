@@ -16,26 +16,11 @@ services:
       dockerfile: Dockerfile
     container_name: backend_api
     command: node server.js
-    environment:
-      - MONGO_URL=mongodb://mongo:27017/due2
-      - JWT_SECRET=supersecret
+    env_file: .env
     depends_on:
       - mongo
     ports:
       - "3000:3000"
-
-  game_persistence:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: game_persistence
-    command: node server2.js
-    environment:
-      - MONGO_URL=mongodb://mongo:27017/due2
-    depends_on:
-      - mongo
-    ports:
-      - "4000:4000"
 
   game_socket:
     build:
@@ -43,8 +28,7 @@ services:
       dockerfile: Dockerfile
     container_name: game_socket
     command: node server1.js
-    environment:
-      - JWT_SECRET=supersecret
+    env_file: .env
     depends_on:
       - backend_api
     ports:
@@ -56,11 +40,10 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: frontend
     ports:
-      - "80:80"
+      - "3001:80"
     depends_on:
       - backend_api
       - game_socket
-      - game_persistence
 
 volumes:
   mongo_data:

@@ -27,7 +27,7 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.1",
     "react-scripts": "5.0.1",
-    "socket.io": "^4.8.1",
+    "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.1",
     "web-vitals": "^2.1.4"
   },
@@ -66,5 +66,8 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/AlessiaLele/DUE2.0/issues"
+  },
+  "devDependencies": {
+    "typescript": "4.9.5"
   }
 }

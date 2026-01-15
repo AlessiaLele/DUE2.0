@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 const server = http.createServer(app);
-const User = require('./models/User');
+
 
 app.use(cors());
 app.use(express.json());
@@ -21,7 +21,7 @@ const games = {};
 
 const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000/api/auth";
 
-// Auth middleware
+
 io.use(async (socket, next) => {
     const tokenS1 = socket.handshake.auth?.tokenS1;
     if (!tokenS1) return next(new Error("tokenS1 mancante"));
@@ -156,7 +156,6 @@ io.on("connection", (socket) => {
                 sunkSize = shipHit.length;
             }
         }
-
         // Notifico ATTACCANTE: risultato sul campo nemico (per "marcare" la sua griglia enemy)
         socket.emit("opponentMove", { x, y, hit, sunk, sunkSize });
 

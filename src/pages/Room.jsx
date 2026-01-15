@@ -58,19 +58,17 @@ export default function Room() {
     const [previewCells, setPreviewCells] = useState([]);
     const [message, setMessage] = useState('');
 
-    // Turni
+
     const [myTurn, setMyTurn] = useState(false);
 
-    // Flotta piazzata come array di navi (ogni nave = array di celle {r,c})
+
     const placedShipsRef = useRef([]);
     const overlayRef = useRef(null);
 
-    // 👇 Coda per assegnare il tipo/emoji ad ogni sistema piazzato
     const [systemQueues, setSystemQueues] = useState(initialSystemQueues);
 
     const formatCoordinate = (row, col) => `${LETTERS[col]}${row + 1}`;
 
-    // ————— Connessione socket & join —————
     useEffect(() => {
         const tokenS1 = localStorage.getItem("tokenS1");
         const s = io("http://localhost:5001", { auth: { tokenS1 } });
@@ -88,14 +86,13 @@ export default function Room() {
             navigate("/lobby");
         });
 
-        // Quando entrano in due
+
         s.on("bothConnected", () => {
             setWaitingTwo(false);
             setTimerActive(true);
-            // Il client resta comunque in "isPlacing" finché non invia ready
         });
 
-        // Start effettivo quando entrambi hanno mandato ready
+
         s.on("gameStart", ({ firstTurnSocketId }) => {
             setGameStarted(true);
             setMessage("🛡️ La cyber-battaglia è iniziata!");
@@ -106,7 +103,6 @@ export default function Room() {
             setMyTurn(s.id === turnSocketId);
         });
 
-        // Difensore: colpo ricevuto sul mio campo
         s.on("attackResult", ({ x, y, hit }) => {
             const coord = formatCoordinate(y, x); // NB: y = row, x = col
             setMyGrid(prev => {
@@ -119,7 +115,6 @@ export default function Room() {
                 : `🛡️ Tentativo avversario bloccato in ${coord}.`);
         });
 
-        // Attaccante: feedback sul campo nemico (per marcare dove ho tirato)
         s.on("opponentMove", ({ x, y, hit, sunk, sunkSize }) => {
             const coord = formatCoordinate(y, x);
             setEnemyGrid(prev => {
@@ -167,9 +162,7 @@ export default function Room() {
             const t = setTimeout(() => setPlacementTimeLeft(tl => tl - 1), 1000);
             return () => clearTimeout(t);
         }
-        // tempo scaduto → completa automaticamente e manda ready
         autoCompleteAndReady();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isPlacing, timerActive, placementTimeLeft]);
 
     // Piazzamento con controllo
@@ -183,11 +176,9 @@ export default function Room() {
         return true;
     }
 
-    // Autoposizionamento completo con assegnazione dei tipi (ignora il parziale, come l’originale)
     function placeShipsRandomlyWithGroups() {
         const grid = createEmptyGrid();
         const groups = [];
-        // copia mutabile delle code per dimensione
         const qBySize = JSON.parse(JSON.stringify(initialSystemQueues));
 
         for (const ship of INITIAL_SHIPS) {
@@ -227,7 +218,6 @@ export default function Room() {
         if (!isPlacing || !size) return;
         const newGrid = myGrid.map(r => r.map(c => ({ ...c })));
         if (canPlaceShip(newGrid, startRow, startCol, size, orientation)) {
-            // tipo (e icona) per la nave che stai piazzando ORA
             const typeQueue = systemQueues[size] || [];
             const systemType = typeQueue.length
                 ? typeQueue[0]
@@ -246,16 +236,13 @@ export default function Room() {
             }
             setMyGrid(newGrid);
 
-            // registra la nave
             placedShipsRef.current = [...placedShipsRef.current, cells];
 
-            // aggiorna scorte
             const updated = availableShips.map(s =>
                 s.size === size && s.count > 0 ? { ...s, count: s.count - 1 } : s
             );
             setAvailableShips(updated);
 
-            // scala la coda del tipo usato
             setSystemQueues(prev => ({
                 ...prev,
                 [size]: (prev[size] && prev[size].length) ? prev[size].slice(1) : [],
@@ -269,7 +256,6 @@ export default function Room() {
     }
 
     function autoCompleteAndReady() {
-        // completa: rigenera una flotta completa random (ignora il parziale), come l’originale
         const { grid, groups } = placeShipsRandomlyWithGroups();
         setMyGrid(grid);
         placedShipsRef.current = groups;
@@ -280,7 +266,6 @@ export default function Room() {
         setIsPlacing(false);
         if (auto) setMessage('⏱️ Tempo scaduto! I sistemi sono stati piazzati automaticamente. In attesa dell’avvio…');
 
-        // invia flotta e ready
         socket?.emit("placeFleet", { roomId, ships: placedShipsRef.current });
         socket?.emit("ready", { roomId });
     }
@@ -296,7 +281,7 @@ export default function Room() {
         setMyTurn(false); // attendo esito/turnChanged dal server
     }
 
-    // ————— Drag & Drop helpers —————
+    // ————— Drag & Drop —————
     const canPlacePreviewCell = (key) => {
         const [r, c] = key.split('-').map(Number);
         return r >= 0 && c >= 0 && r < GRID_SIZE && c < GRID_SIZE;
@@ -316,7 +301,6 @@ export default function Room() {
             bg = canPlacePreviewCell(key) ? 'bg-yellow-300' : 'bg-red-300';
         }
 
-        // 👇 icona del sistema (solo sulla tua griglia e se non è stato ancora colpito/mancato)
         let content = null;
         if (showShips && cell.hasShip && !cell.status) {
             const emoji = SYSTEM_EMOJI[cell.systemType] || '💻';
@@ -396,7 +380,6 @@ export default function Room() {
         );
     };
 
-    // ————— UI extra (popup) —————
     const apriPopup = () => {
         const popup = document.getElementById('confirm-popup');
         const overlay = document.getElementById('overlay');
@@ -411,7 +394,6 @@ export default function Room() {
     };
     const confermaUscita = () => navigate('/menu-page');
 
-    // ————— Render —————
     return (
         <div className="d-flex justify-content-center align-items-center vh-100">
         <div className="p-4">

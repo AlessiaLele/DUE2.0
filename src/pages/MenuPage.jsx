@@ -7,7 +7,7 @@ const MenuPage = () => {
     const navigate = useNavigate();
 
     const startGame = () => {
-        navigate("/game-mode");
+        navigate("/lobby");
     };
     // 🔹 Funzione per richiedere un nuovo Access Token
     const refreshToken = async () => {

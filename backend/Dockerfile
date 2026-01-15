@@ -10,7 +10,7 @@ RUN npm ci --only=production
 COPY . .
 
 # Expose ports used by the backend processes (for docker-compose)
-EXPOSE 3000 4000 5001
+EXPOSE 3000 5001
 
 # Default command can be overridden by docker-compose service command
 CMD ["node", "server.js"]
