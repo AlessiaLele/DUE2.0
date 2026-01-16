@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const router = express.Router();
 
-let otpStore = {}; // { email: { code: '123456', expires: Date } }
+let otpStore = {};
 
 async function generateTokens(user) {
     const accessToken = jwt.sign(
@@ -20,7 +20,6 @@ async function generateTokens(user) {
         { expiresIn: '7d' }
     );
 
-    // salva il refresh token nel DB (aggiunge alla lista delle sessioni)
     user.refreshTokens = user.refreshTokens || [];
     user.refreshTokens.push(refreshToken);
     await user.save();
@@ -32,11 +31,10 @@ function generateServerToken(user) {
     if (!process.env.JWT_S1_SECRET) {
         throw new Error("JWT_S1_SECRET non definito in .env");
     }
-    // payload minimo con id e username
     return jwt.sign(
         { id: user._id, username: user.username },
         process.env.JWT_S1_SECRET,
-        { expiresIn: '7d' } // regola la durata come preferisci
+        { expiresIn: '7d' }
     );
 }
 
@@ -64,7 +62,7 @@ router.post('/login', async (req, res) => {
             return res.status(500).json({ msg: "Configurazione server errata (mancano secret)" });
         }
 
-        // Genera access e refresh token e salva refresh token nel DB
+
         const { accessToken, refreshToken } = await generateTokens(user);
         let tokenS1;
         try {
@@ -74,25 +72,25 @@ router.post('/login', async (req, res) => {
             return res.status(500).json({ msg: "Configurazione server errata (manca JWT_S1_SECRET)" });
         }
 
-        // Se l'utente ha dato il consenso, setta il cookie (httpOnly)
+
         if (consent) {
             const secureFlag = process.env.NODE_ENV === 'production';
             res.cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: secureFlag,
                 sameSite: "Lax",
-                maxAge: 15 * 60 * 1000 // 15 minuti
+                maxAge: 15 * 60 * 1000
             });
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: secureFlag,
                 sameSite: "Lax",
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
+                maxAge: 7 * 24 * 60 * 60 * 1000
             });
         }
 
-        // Nota: NON restituiamo il token nel body per evitare che venga salvato in localStorage lato client
+
         res.json({ username: user.username,tokenS1, msg: 'Login effettuato' });
     } catch (err) {
         console.error("Errore in /login:", err);
@@ -100,7 +98,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Configura nodemailer con Ethereal
+
 async function createTransporter() {
     return nodemailer.createTransport({
         host: 'smtp.ethereal.email',
@@ -164,18 +162,17 @@ router.post('/verify-otp', async (req, res) => {
 
 const authMiddleware = require("../middleware/authMiddleware");
 
-//Informazione del profilo, solo se l'utente è autenticato
+
 router.get("/profile", authMiddleware, (req, res) => {
     res.json({ msg: "Profilo utente", user: req.user });
 });
 
-//Cancella il token di sessione e rimuove il refresh token server-side
+
 router.post("/logout", async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
 
         if (refreshToken) {
-            // cerca l'utente che ha questo refresh token e lo rimuove
             const user = await User.findOne({ refreshTokens: refreshToken });
             if (user) {
                 user.refreshTokens = user.refreshTokens.filter(t => t !== refreshToken);
@@ -201,40 +198,35 @@ router.post("/logout", async (req, res) => {
     }
 });
 
-// REFRESH TOKEN (rotation)
+// REFRESH TOKEN
 router.post('/refresh', async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) return res.status(401).json({ msg: 'Refresh token mancante' });
 
     try {
-        // verifica firma del refresh token
         const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-        // trova utente corrispondente
         const user = await User.findById(decoded.id);
         if (!user) {
             return res.status(403).json({ msg: 'Utente non trovato' });
         }
 
-        // controlla che il refresh token sia ancora registrato per quell'utente
+
         if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
-            // refresh token non trovato: possibile tentativo di reuse/abuso
             return res.status(403).json({ msg: 'Refresh token non valido' });
         }
 
-        // ROTATION: crea nuovo refresh token e sostituisce quello vecchio
+        // ROTATION
         const newRefreshToken = jwt.sign(
             { id: user._id },
             process.env.JWT_REFRESH_SECRET,
             { expiresIn: '7d' }
         );
 
-        // rimuove il token usato e aggiunge il nuovo
         user.refreshTokens = user.refreshTokens.filter(t => t !== refreshToken);
         user.refreshTokens.push(newRefreshToken);
         await user.save();
 
-        // crea nuovo access token
         const accessToken = jwt.sign(
             { id: user._id, username: user.username },
             process.env.JWT_SECRET,
@@ -243,19 +235,18 @@ router.post('/refresh', async (req, res) => {
 
         const secureFlag = process.env.NODE_ENV === 'production';
 
-        // setta cookie nuovi
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: secureFlag,
             sameSite: "Lax",
-            maxAge: 15 * 60 * 1000 // 15 min
+            maxAge: 15 * 60 * 1000
         });
 
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: secureFlag,
             sameSite: "Lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
         res.json({ msg: 'Access token rinnovato' });

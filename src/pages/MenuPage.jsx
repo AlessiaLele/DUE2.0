@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../assets/style3.css";
+import "../assets/styleMP.css";
 
 const MenuPage = () => {
     const navigate = useNavigate();
@@ -9,7 +9,7 @@ const MenuPage = () => {
     const startGame = () => {
         navigate("/lobby");
     };
-    // 🔹 Funzione per richiedere un nuovo Access Token
+
     const refreshToken = async () => {
         try {
             const res = await fetch("http://localhost:3000/api/auth/refresh", {
@@ -19,7 +19,7 @@ const MenuPage = () => {
 
             if (!res.ok) {
                 console.warn("Refresh token non valido o scaduto");
-                navigate("/"); // torna alla pagina iniziale se refresh fallisce
+                navigate("/");
             }
         } catch (err) {
             console.error("Errore nel refresh token:", err);
@@ -30,19 +30,19 @@ const MenuPage = () => {
     useEffect(() => {
         const checkAuthAndConsent = async () => {
             try {
-                // 🔹 Controlla consenso cookie
+
                 const consent = localStorage.getItem("cookie_consent");
                 if (!consent) {
                     navigate("/"); // torna alla pagina iniziale se non ha accettato i cookie
                     return;
                 }
 
-                // 🔹 Controlla autenticazione
+
                 const res = await fetch("http://localhost:3000/api/auth/profile", {
                     credentials: "include"
                 });
                 if (!res.ok) {
-                    navigate("/"); // se non sei loggato, torna alla pagina inziale
+                    navigate("/");
                 }
             } catch {
                 navigate("/");

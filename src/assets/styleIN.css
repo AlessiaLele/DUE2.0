@@ -1,8 +1,7 @@
 
-
 .instructions-container {
     max-width: 800px;
-    margin: 0 auto;  /* centrato orizzontalmente */
+    margin: 0 auto;
     background-color: white;
     padding: 30px;
     border-radius: 30px;
@@ -53,5 +52,5 @@
 }
 
 .custom-shadow {
-    box-shadow: 0 10px 30px rgba(10, 10, 0, 10); /* più grande e più scura */
+    box-shadow: 0 10px 30px rgba(10, 10, 0, 10);
 }

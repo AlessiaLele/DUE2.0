@@ -63,6 +63,6 @@ button{
     font-size: 14px;
     margin-top: 10px;
     text-decoration: underline;
-    display: block;       /* fa occupare tutta la riga */
-    text-align: center;   /* centra il testo */
+    display: block;
+    text-align: center;
 }

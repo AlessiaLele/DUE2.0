@@ -6,9 +6,9 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import "bootstrap/dist/css/bootstrap.min.css";
-import '../assets/style2.css';
+import '../assets/styleLOG.css';
 
-function Login() { //stati
+function Login() {
     const [isLogin, setIsLogin] = useState(true);
     const [otpSent, setOtpSent] = useState(false);
     const navigate = useNavigate();
@@ -40,7 +40,7 @@ function Login() { //stati
                 credentials: 'include'
             });
 
-            const data = await res.json(); //converte la risposta del server in oggetto js
+            const data = await res.json();
             if (res.ok) {
                 if (data.tokenS1) localStorage.setItem("tokenS1", data.tokenS1);
                 alert(`Benvenuto, ${data.username}`);

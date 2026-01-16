@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../assets/style1.css";
+import "../assets/styleWP.css";
 
 function WelcomePage() {
     return (

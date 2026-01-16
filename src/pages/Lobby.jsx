@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-
-// Material UI
 import { Card, CardContent, Typography, TextField, Button, Divider } from "@mui/material";
 
 export default function Lobby() {
@@ -52,7 +50,7 @@ export default function Lobby() {
 
                     <Divider sx={{ my: 2 }}>Oppure</Divider>
 
-                    {/* Join stanza esistente */}
+                    {/* Unirsi a una stanza esistente */}
                     <TextField
                         fullWidth
                         margin="normal"
@@ -67,7 +65,7 @@ export default function Lobby() {
                         onClick={joinRoom}
                         sx={{
                             borderRadius: 2,
-                            backgroundColor: "#28a745", // verde bootstrap
+                            backgroundColor: "#28a745",
                             "&:hover": {
                                 backgroundColor: "#218838"
                             }

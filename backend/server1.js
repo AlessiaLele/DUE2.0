@@ -19,8 +19,6 @@ const io = new Server(server, {
 
 const games = {};
 
-const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000/api/auth";
-
 
 io.use(async (socket, next) => {
     const tokenS1 = socket.handshake.auth?.tokenS1;
@@ -56,13 +54,11 @@ io.on("connection", (socket) => {
 
         if (!games[roomId]) games[roomId] = { players: {}, order: [], turn: null };
 
-        // 👇 recupero lo username dal DB
         let username = socket.user.username;
-
 
         games[roomId].players[socket.id] = {
             userId: socket.user.id,
-            username,            // 👈 salvo anche username
+            username,
             ready: false,
             shipsList: [],
             shipCells: new Set(),
@@ -80,13 +76,11 @@ io.on("connection", (socket) => {
         }
     });
 
-    // Il client invia l'intera flotta: ships = array di navi, ogni nave è array di celle {r,c}
-    // Esempio: [ [ {r:0,c:0},{r:0,c:1},{r:0,c:2} ], [ {r:4,c:4},{r:5,c:4} ], ... ]
+    // Il client invia l'intera flotta di navi: ships = array di navi, ogni nave è array di celle {r,c}
     socket.on("placeFleet", ({ roomId, ships }) => {
         const game = games[roomId];
         if (!game || !game.players[socket.id]) return;
 
-        // Salvo sia la lista navi (come array di array) sia l'insieme piatto di celle per check rapidi
         const shipsList = ships.map(shipArr =>
             shipArr.map(({ r, c }) => `${r},${c}`)
         );
@@ -96,19 +90,18 @@ io.on("connection", (socket) => {
         game.players[socket.id].shipCells = shipCells;
     });
 
-    // Il client segnala che è pronto (ha finito di piazzare / scaduto timer)
     socket.on("ready", ({ roomId }) => {
         const game = games[roomId];
         if (!game || !game.players[socket.id]) return;
         game.players[socket.id].ready = true;
 
-        // Se entrambi ready -> start
+
         const playerIds = Object.keys(game.players);
         if (playerIds.length === 2 && playerIds.every(pid => game.players[pid].ready)) {
+
             // Primo turno al primo entrato (order[0])
             game.turn = game.order[0];
 
-            // Comunico avvio e chi inizia
             io.to(roomId).emit("gameStart", {
                 roomId,
                 firstTurnSocketId: game.turn,
@@ -126,7 +119,7 @@ io.on("connection", (socket) => {
         const defenderId = game.order.find(id => id !== attackerId);
         if (!defenderId) return;
 
-        // Turno valido?
+        // Verifica turno
         if (game.turn !== attackerId) {
             socket.emit("errorMessage", "Non è il tuo turno.");
             return;
@@ -136,7 +129,7 @@ io.on("connection", (socket) => {
         const defender = game.players[defenderId];
         if (!attacker || !defender) return;
 
-        const cell = `${y},${x}`; // NB: manteniamo convenzione r=y, c=x
+        const cell = `${y},${x}`;
         if (attacker.moves.has(cell)) {
             socket.emit("moveIgnored", { x, y });
             return;
@@ -149,32 +142,32 @@ io.on("connection", (socket) => {
 
         if (hit) {
             defender.hitsReceived.add(cell);
-            // Verifico se ho affondato una specifica nave
+            // Verifica se è stata affondata una specifica nave
             const shipHit = defender.shipsList.find(shipArr => shipArr.includes(cell));
             if (shipHit && shipHit.every(c => defender.hitsReceived.has(c))) {
                 sunk = true;
                 sunkSize = shipHit.length;
             }
         }
-        // Notifico ATTACCANTE: risultato sul campo nemico (per "marcare" la sua griglia enemy)
+        // Notifico ATTACCANTE
         socket.emit("opponentMove", { x, y, hit, sunk, sunkSize });
 
-        // Notifico DIFENSORE: il colpo sul suo campo
+        // Notifico DIFENSORE
         io.to(defenderId).emit("attackResult", { x, y, hit, sunk, sunkSize });
 
-        // Win check (tutte le celle nave colpite)
+        // -----Vittoria------//
         if (defender.hitsReceived.size >= defender.shipCells.size && defender.shipCells.size > 0) {
             io.to(roomId).emit("gameOver", { winner: attacker.username });
             delete games[roomId];
             return;
         }
 
-        // Alternanza turni: passa all’altro indipendentemente dall’esito
+
         game.turn = defenderId;
         io.to(roomId).emit("turnChanged", { turnSocketId: game.turn });
     });
 
-    // Disconnessione
+
     socket.on("disconnect", () => {
         console.log(`Utente ${socket.user.id} disconnesso`);
         for (const roomId in games) {
@@ -185,9 +178,9 @@ io.on("connection", (socket) => {
             delete game.players[socket.id];
             io.to(roomId).emit("message", `Un giocatore si è disconnesso`);
 
-            // Vittoria per forfeit se resta un giocatore
+            // Vittoria per forfeit
             if (otherId && game.players[otherId]) {
-                io.to(roomId).emit("gameOver", { winner: game.players[otherId].userId, forfeit: true });
+                io.to(roomId).emit("gameOver", { winner: otherId, forfeit: true });
             }
             delete games[roomId];
         }

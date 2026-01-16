@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 const corsOptions = {
     origin: "http://localhost:3001",
-    credentials: true               // fondamentale per invio cookie
+    credentials: true
 };
 
 app.use(cors(corsOptions));

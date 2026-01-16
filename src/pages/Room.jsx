@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import '../assets/style4.css';
+import '../assets/styleRM.css';
 
 const GRID_SIZE = 10;
 const LETTERS = 'ABCDEFGHIJ'.split('');
@@ -13,7 +13,7 @@ const INITIAL_SHIPS = [
     { size: 2, count: 1 },
 ];
 
-// 👇 Tema informatico: icone per sistema
+
 const SYSTEM_EMOJI = {
     'Data Center': '🖥️',
     'Firewall': '🔥',
@@ -22,11 +22,11 @@ const SYSTEM_EMOJI = {
     'Router': '📡',
 };
 
-// 👇 Code dei sistemi per misura (usate per decidere il “tipo” al piazzamento)
+
 const initialSystemQueues = {
     5: ['Data Center'],
     4: ['Firewall'],
-    3: ['Server Web', 'Database'], // due sistemi da 3: prima Server Web, poi Database
+    3: ['Server Web', 'Database'],
     2: ['Router'],
 };
 
@@ -44,11 +44,9 @@ export default function Room() {
     const [gameStarted, setGameStarted] = useState(false);
     const [waitingTwo, setWaitingTwo] = useState(true);
 
-    // Griglie
     const [myGrid, setMyGrid] = useState(createEmptyGrid());
     const [enemyGrid, setEnemyGrid] = useState(createEmptyGrid());
 
-    // Stato piazzamento
     const [isPlacing, setIsPlacing] = useState(true);
     const [orientation, setOrientation] = useState('horizontal');
 
@@ -75,7 +73,7 @@ export default function Room() {
 
         if (!tokenS1) {
             alert("tokenS1 mancante: effettua il login");
-            navigate("/"); // oppure comportamento che preferisci
+            navigate("/");
             return;
         }
 
@@ -104,7 +102,7 @@ export default function Room() {
         });
 
         s.on("attackResult", ({ x, y, hit }) => {
-            const coord = formatCoordinate(y, x); // NB: y = row, x = col
+            const coord = formatCoordinate(y, x); // NB: y = riga, x = colonna
             setMyGrid(prev => {
                 const g = prev.map(r => r.map(c => ({ ...c })));
                 g[y][x].status = hit ? "hit" : "miss";
@@ -137,7 +135,7 @@ export default function Room() {
             setMyTurn(false);
             setMessage(
                 forfeit
-                    ? `🏁 Attacco concluso per ritiro. Vincitore: ${winner}`
+                    ? `🏁 Attacco concluso per ritiro. Sei tu il vincitore.`
                     : `🏁 Attacco concluso. Vincitore: ${winner}`
             );
         });
@@ -147,7 +145,6 @@ export default function Room() {
         s.on("moveIgnored", ({ x, y }) => {
             const coord = formatCoordinate(y, x);
             setMessage(`⚠️ Hai già provato ${coord}. Mossa ignorata, puoi riprovare.`);
-            // Ripristino il turno: il client si era già tolto il turno quando ha emesso l'attack
             setMyTurn(true);
         });
 
@@ -155,7 +152,7 @@ export default function Room() {
         return () => s.disconnect();
     }, [roomId, navigate]);
 
-    // ————— Timer piazzamento —————
+    // ————— Timer piazzamento ————— //
     useEffect(() => {
         if (!isPlacing || !timerActive) return;
         if (placementTimeLeft > 0) {
@@ -189,7 +186,6 @@ export default function Room() {
                     const row = Math.floor(Math.random() * GRID_SIZE);
                     const col = Math.floor(Math.random() * GRID_SIZE);
                     if (canPlaceShip(grid, row, col, ship.size, ori)) {
-                        // prendi il tipo dalla coda relativa alla dimensione
                         const q = qBySize[ship.size] || [];
                         const systemType = q.length ? q.shift() :
                             (ship.size === 5 ? 'Data Center'
@@ -202,7 +198,7 @@ export default function Room() {
                             const r = row + (ori === 'vertical' ? i : 0);
                             const c = col + (ori === 'horizontal' ? i : 0);
                             grid[r][c].hasShip = true;
-                            grid[r][c].systemType = systemType; // 👈 salva il tipo per l’icona
+                            grid[r][c].systemType = systemType;
                             cells.push({ r, c, systemType });
                         }
                         groups.push(cells);
@@ -231,7 +227,7 @@ export default function Room() {
                 const r = startRow + (orientation === 'vertical' ? i : 0);
                 const c = startCol + (orientation === 'horizontal' ? i : 0);
                 newGrid[r][c].hasShip = true;
-                newGrid[r][c].systemType = systemType; // 👈 assegna tipo per mostrare l’icona
+                newGrid[r][c].systemType = systemType;
                 cells.push({ r, c, systemType });
             }
             setMyGrid(newGrid);
@@ -270,18 +266,18 @@ export default function Room() {
         socket?.emit("ready", { roomId });
     }
 
-    // ————— Attacco —————
+    // ————— Attacco ————— //
     function attack(row, col) {
         if (!gameStarted || !myTurn || isPlacing) return;
 
         const cell = enemyGrid[row][col];
-        if (cell.hit) return; // (lasciato come nell’originale)
+        if (cell.hit) return;
 
         socket?.emit("attack", { roomId, x: col, y: row });
-        setMyTurn(false); // attendo esito/turnChanged dal server
+        setMyTurn(false);
     }
 
-    // ————— Drag & Drop —————
+
     const canPlacePreviewCell = (key) => {
         const [r, c] = key.split('-').map(Number);
         return r >= 0 && c >= 0 && r < GRID_SIZE && c < GRID_SIZE;
@@ -291,11 +287,11 @@ export default function Room() {
         let bg = 'bg-blue-200';
         const key = `${row}-${col}`;
         if (cell.status === "hit") {
-            bg = 'bg-red-600';   // colpito
+            bg = 'bg-red-600';
         } else if (cell.status === "miss") {
-            bg = 'bg-gray-600';  // mancato (grigio scuro)
+            bg = 'bg-gray-600';
         } else if (showShips && cell.hasShip) {
-            bg = 'bg-gray-400';  // sistema visibile solo sulla propria griglia
+            bg = 'bg-gray-400';
         }
         if (previewCells.includes(key)) {
             bg = canPlacePreviewCell(key) ? 'bg-yellow-300' : 'bg-red-300';
@@ -431,7 +427,6 @@ export default function Room() {
                         {availableShips
                             .flatMap((ship) =>
                                 Array.from({ length: ship.count }).map((_, i) => {
-                                    // Nome del sistema in base alla dimensione e all’indice (per distinguere i due da 3)
                                     let systemName = '';
                                     if (ship.size === 5) systemName = 'Data Center';
                                     else if (ship.size === 4) systemName = 'Firewall';
@@ -456,7 +451,6 @@ export default function Room() {
                                             const unitHeight = rect.height / shipObj.size;
                                             offset = Math.floor(relY / unitHeight);
                                         }
-                                        // clamp
                                         offset = Math.max(0, Math.min(offset, shipObj.size - 1));
                                         e.dataTransfer.setData('application/json', JSON.stringify({ size: shipObj.size, offset }));
                                     }}
